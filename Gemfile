@@ -14,8 +14,7 @@ gem "importmap-rails"
 gem "turbo-rails"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails"
-# Use Tailwind CSS [https://github.com/rails/tailwindcss-rails]
-gem "tailwindcss-rails"
+
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
@@ -54,6 +53,7 @@ group :development, :test do
 end
 
 gem "paranoia", "~> 3.0", ">= 3.0.1"
+gem 'geocoder', '~> 1.8', '>= 1.8.5'
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
@@ -61,3 +61,6 @@ group :development do
 end
 
 gem "devise", "~> 4.9"
+gem "tailwindcss-ruby", "~> 4.0"
+
+gem "tailwindcss-rails", "~> 4.2"

@@ -1,0 +1,7 @@
+<div>
+  <%= form.label field, class: "block text-sm font-medium text-gray-700" %>
+  <%= form.send(type, field, class: "mt-1 w-full rounded-md border border-gray-300 p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500") %>
+  <% if field == :password && @minimum_password_length %>
+    <p class="mt-1 text-sm text-gray-500"><%= @minimum_password_length %> characters minimum</p>
+  <% end %>
+</div> 
