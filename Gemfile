@@ -53,7 +53,11 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
+gem "paranoia", "~> 3.0", ">= 3.0.1"
+
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 end
+
+gem "devise", "~> 4.9"
