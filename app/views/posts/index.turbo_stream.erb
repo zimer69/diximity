@@ -1,0 +1,2 @@
+<%= turbo_stream.append "posts", partial: "post", collection: @posts %>
+<%= turbo_stream.replace "post", partial: "load_more", locals: { pagy: @pagy } %>
