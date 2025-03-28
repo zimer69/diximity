@@ -1,0 +1,11 @@
+<div class="max-w-2xl mx-auto px-4">
+  <h1 class="text-4xl font-bold mb-6 justify-center">Latest News</h1>
+
+  <div id="posts" class="space-y-10">
+    <%= render @posts %>
+  </div>
+
+  <div class="mt-8">
+    <%= render partial: "load_more", locals: { pagy: @pagy } %>
+  </div>
+</div>
