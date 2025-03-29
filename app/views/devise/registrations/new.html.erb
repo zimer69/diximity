@@ -13,7 +13,11 @@
       <%= render "devise/shared/error_messages", resource: resource %>
 
       <div class="space-y-4">
-        <!-- User Info -->
+        <div>
+          <%= f.label :profile_picture, class: "block text-sm font-medium text-gray-700" %>
+          <%= f.file_field :profile_picture, direct_upload: true, class: "mt-1" %>
+        </div>
+
         <div>
           <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
           <%= f.text_field :name, required: true, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
@@ -24,9 +28,9 @@
           <%= f.text_area :bio, required: true, rows: 3, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
-        <div>
+        <div class="field">
           <%= f.label :specialty, class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_field :specialty, required: true, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
+          <%= f.select :specialty, specialty_options, {}, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
         <!-- Login Info -->

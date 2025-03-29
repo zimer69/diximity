@@ -6,6 +6,8 @@ class Address < ApplicationRecord
   geocoded_by :full_address
   after_validation :geocode, if: :address_changed?
 
+  validates :address1, :city, :state, :zip, :country, presence: true
+
   def full_address
     [address1, address2, city, state, zip, country].compact.join(', ')
   end

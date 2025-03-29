@@ -35,7 +35,7 @@
         <div class="flex space-x-6 items-center">
           <% if user_signed_in? %>
             <%= link_to "Feed", posts_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
-            <%= link_to "Profile", edit_user_registration_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
+            <%= link_to "Profile", user_path(current_user), class: "text-gray-700 hover:text-blue-600 font-medium" %>
             <%= button_to "Sign out", destroy_user_session_path, method: :delete, form: { data: { turbo: false } }, class: "text-red-600 hover:underline" %> </nav>
           <% else %>
             <%= link_to "Sign in", new_user_session_path, class: "text-sm text-blue-600 hover:underline" %>

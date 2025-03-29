@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "users/show"
+  get "users/index"
   get "posts/index"
   root "posts#index"
   get "home/index"
@@ -13,4 +15,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   resources :posts, only: [:index]
+  resources :users, only: [:index, :show, :update]
 end
