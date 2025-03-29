@@ -1,0 +1,64 @@
+<!-- app/views/users/show.html.erb -->
+<div class="w-full max-w-screen-xl mx-auto mt-10 bg-white shadow rounded-md overflow-hidden mb-20">
+  <div class="relative h-48 w-full bg-cover bg-center"
+      style="background-image: url('<%= @user.background_image.attached? ? url_for(@user.background_image) : "https://as2.ftcdn.net/v2/jpg/01/33/33/41/1000_F_133334155_X23HzbJKawbIgXVaub4bPM8CjpkS5uMS.jpg" %>');">
+    
+    <% if current_user == @user %>
+      <div class="absolute top-2 right-2 z-10">
+        <%= form_with model: @user, url: user_path(@user), method: :patch, local: true, html: { multipart: true } do |f| %>
+          <label for="background_upload" class="cursor-pointer bg-white/70 p-2 rounded-full shadow hover:bg-white transition">
+            🖊️
+          </label>
+          <%= f.file_field :background_image,
+                id: "background_upload",
+                accept: "image/*",
+                class: "hidden",
+                onchange: "this.form.submit()" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex flex-col sm:flex-row items-center sm:items-start px-8 py-6">
+    <div class="-mt-20 sm:mr-8 z-20">
+      <% if @user.profile_picture.attached? %>
+        <%= image_tag @user.profile_picture.variant(resize_to_fill: [120, 120]), class: "rounded-full border-4 border-white shadow-lg w-[120px] h-[120px] object-cover" %>
+      <% else %>
+        <div class="w-[120px] h-[120px] rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border-4 border-white shadow-lg">
+          No image
+        </div>
+      <% end %>
+      <% if current_user == @user %>
+        <div class="mt-4 text-center">
+          <%= link_to "Edit Profile", edit_user_registration_path, class: "inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm" %>
+        </div>
+      <% end %>
+    </div>
+
+
+
+    <div class="flex-1 text-center sm:text-left mt-4 sm:mt-0">
+      <h1 class="text-3xl font-bold text-gray-900"><%= @user.name %></h1>
+      <p class="text-sm text-gray-500 mb-2"><%= @user.specialty %></p>
+      <p> <%= @user.profile_summary %> </p>
+    </div>
+  </div>
+
+  <div class="border-t px-8 py-6 text-gray-700 flex justify-between gap-10">
+    <p class="text-gray-700 w-full text-justify indent-6"><%= @user.bio %></p>
+    <% if @user.address %>
+      <div class="px-8 py-6 text-gray-700 shadow-lg rounded-md h-min">
+        <h3 class="font-semibold mb-2 text-lg">Address</h3>
+        <p><%= @user.address.address1 %></p>
+        <% if @user.address.address2.present? %>
+          <p><%= @user.address.address2 %></p>
+        <% end %>
+        <p><%= @user.address.city %>, <%= @user.address.state %> <%= @user.address.zip %></p>
+        <p><%= @user.address.country %></p>
+        <% if @user.address.tax_phone_number.present? %>
+          <p class="mt-2 text-sm text-gray-500">Phone: <%= @user.address.tax_phone_number %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
