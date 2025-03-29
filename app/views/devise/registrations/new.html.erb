@@ -9,6 +9,7 @@
     </div>
 
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+
       <%= render "devise/shared/error_messages", resource: resource %>
 
       <div class="space-y-4">
@@ -89,7 +90,7 @@
         <% end %>
 
         <div class="pt-4">
-          <%= f.submit "Create Account", class: "w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 shadow" %>
+          <%= f.submit "Create Account", class: "w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 shadow", data: {turbo: false} %>
         </div>
       </div>
     <% end %>

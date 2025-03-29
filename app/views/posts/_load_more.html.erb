@@ -3,7 +3,7 @@
     <%= link_to(
       "Load more posts",
       posts_path(page: pagy.next),
-      class: "text-white",
+      class: "invisible",
       data: { 
         turbo_stream: "",
         controller: "autoclick" }
