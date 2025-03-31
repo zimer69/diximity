@@ -70,12 +70,13 @@
     </nav>
 
     <% if notice %>
-      <div class="bg-green-100 text-green-800 p-3 mb-4 mt-4 rounded shadow-md w-full max-w-2xl mx-auto text-center">
+      <div class="flash bg-green-100 text-green-800 p-3 mb-4 mt-4 rounded shadow-md w-full max-w-2xl mx-auto text-center">
         <%= notice %>
       </div>
     <% end %>
+
     <% if alert %>
-      <div class="bg-red-100 text-red-800 p-3 mb-4 rounded shadow-md w-full max-w-2xl mx-auto text-center">
+      <div class="flash bg-red-100 text-red-800 p-3 mb-4 rounded shadow-md w-full max-w-2xl mx-auto text-center">
         <%= alert %>
       </div>
     <% end %>
@@ -83,6 +84,21 @@
     <main class="container mx-auto mt-12 px-5 flex">
       <%= yield %>
     </main>
+
+    <script>
+      document.addEventListener("turbo:load", () => {
+        const flashes = document.querySelectorAll(".flash");
+
+        flashes.forEach(flash => {
+          setTimeout(() => {
+            flash.classList.add("opacity-0", "transition-opacity", "duration-500");
+            setTimeout(() => flash.remove(), 500);
+          }, 5000);
+        });
+      });
+    </script>
   </body>
 </html>
+
+
 

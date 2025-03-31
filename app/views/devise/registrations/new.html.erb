@@ -8,93 +8,78 @@
       </p>
     </div>
 
-    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { multipart: true }) do |f| %>
       <%= render "devise/shared/error_messages", resource: resource %>
 
-      <div class="space-y-4">
         <div>
           <%= f.label :profile_picture, class: "block text-sm font-medium text-gray-700" %>
-          <%= f.file_field :profile_picture, direct_upload: true, class: "mt-1" %>
+
+          <%= f.file_field :profile_picture, direct_upload: true, class: "block w-full text-sm text-gray-600
+            file:mr-4 file:py-2 file:px-4
+            file:rounded file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue-100" %>
         </div>
 
+        <!-- Name -->
         <div>
           <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
           <%= f.text_field :name, required: true, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
+        <!-- Bio -->
         <div>
           <%= f.label :bio, class: "block text-sm font-medium text-gray-700" %>
           <%= f.text_area :bio, required: true, rows: 3, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
-        <div class="field">
+        <!-- Specialty -->
+        <div>
           <%= f.label :specialty, class: "block text-sm font-medium text-gray-700" %>
           <%= f.select :specialty, specialty_options, {}, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
-        <!-- Login Info -->
+        <!-- Email -->
         <div>
           <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
           <%= f.email_field :email, required: true, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
+        <!-- Password -->
         <div>
           <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
           <%= f.password_field :password, required: true, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
+        <!-- Password Confirmation -->
         <div>
           <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700" %>
           <%= f.password_field :password_confirmation, required: true, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
         </div>
 
-        <!-- Address -->
+        <!-- Address Fields -->
         <%= f.fields_for :address do |a| %>
           <div class="border-t pt-4">
             <h3 class="text-base font-semibold text-gray-800 mb-3">Address</h3>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <%= a.label :address1, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :address1, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
-              </div>
-
-              <div>
-                <%= a.label :address2, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :address2, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
-              </div>
-
-              <div>
-                <%= a.label :city, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :city, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
-              </div>
-
-              <div>
-                <%= a.label :state, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :state, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
-              </div>
-
-              <div>
-                <%= a.label :zip, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :zip, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
-              </div>
-
+              <% [:address1, :address2, :city, :state, :zip, :tax_phone_number].each do |field| %>
+                <div>
+                  <%= a.label field, class: "block text-sm font-medium text-gray-700" %>
+                  <%= a.text_field field, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
+                </div>
+              <% end %>
               <div>
                 <%= a.label :country, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :country, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
-              </div>
-
-              <div>
-                <%= a.label :tax_phone_number, class: "block text-sm font-medium text-gray-700" %>
-                <%= a.text_field :tax_phone_number, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
+                <%= a.select :country, [["USA", "USA"]], {}, class: "mt-1 w-full rounded-md border border-gray-300 p-2" %>
               </div>
             </div>
           </div>
         <% end %>
 
+        <!-- Submit Button -->
         <div class="pt-4">
-          <%= f.submit "Create Account", class: "w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 shadow", data: {turbo: false} %>
+          <%= f.submit "Create Account", class: "w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 shadow", data: { turbo: false } %>
         </div>
       </div>
     <% end %>

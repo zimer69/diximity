@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_29_044835) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_31_202007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,7 +43,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_29_044835) do
   end
 
   create_table "addresses", force: :cascade do |t|
-    t.bigint "user_id", null: false
     t.string "address1"
     t.string "address2"
     t.string "city"
@@ -56,8 +55,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_29_044835) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["deleted_at"], name: "index_addresses_on_deleted_at"
     t.index ["user_id"], name: "index_addresses_on_user_id"
+  end
+
+  create_table "hospitals", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "posts", force: :cascade do |t|
