@@ -1,7 +1,5 @@
 Rails.application.routes.draw do
-  get "users/show"
-  get "users/index"
-  get "posts/index"
+  get "explore/index"
   root "posts#index"
   get "home/index"
   devise_for :users, controllers: {

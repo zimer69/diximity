@@ -36,6 +36,7 @@
           <% if user_signed_in? %>
             <%= link_to "Feed", posts_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
             <%= link_to "Profile", user_path(current_user), class: "text-gray-700 hover:text-blue-600 font-medium" %>
+            <%= link_to "Explore", explore_index_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
             <div class="relative" data-controller="navbar-dropdown">
               <button
                 type="button"
