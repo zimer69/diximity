@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
   before_action :authenticate_user!
   before_action :find_user, only: [:show, :update]
+  before_action :authenticate_user!, only: [:show]
 
   def index
     @users = User.where.not(id: current_user.id) # or show all

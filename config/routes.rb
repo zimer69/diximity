@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  get "connections/create"
+  get "connections/update"
+  get "connections/destroy"
   get "explore/index"
   root "posts#index"
   get "home/index"
@@ -16,4 +19,5 @@ Rails.application.routes.draw do
 
   resources :posts, only: [:index, :show]
   resources :users, only: [:index, :show, :update]
+  resources :connections, only: [:create, :update, :destroy]
 end
