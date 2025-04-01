@@ -2,63 +2,128 @@
 <div class="container mx-auto px-4 py-6">
   <h1 class="text-3xl font-bold mb-6 text-center">Find Doctors</h1>
 
-  <div class="mb-6 flex justify-center">
+  <!-- Search + Filter -->
+  <div class="mb-6 flex flex-col md:flex-row justify-center items-center gap-4">
     <input
       type="text"
       id="search-input"
       placeholder="Search by name, specialty, or location..."
       class="w-full max-w-xl px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
     />
-  </div>
-
-  <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-items-center">
-    <% @users.each do |user| %>
-      <%= link_to user_path(user), class: "block result-card w-64 bg-white border rounded-lg p-4 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg" do %>
-        <div class="flex items-center gap-4 mb-4">
-          <% if user.profile_picture.attached? %>
-            <%= image_tag user.profile_picture.variant(resize_to_fill: [64, 64]), class: "w-16 h-16 rounded-full object-cover border" %>
-          <% else %>
-            <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm border">
-              No image
-            </div>
-          <% end %>
-          <div>
-            <h2 class="text-lg font-semibold text-gray-900"><%= user.name %></h2>
-            <p class="text-gray-600 text-sm"><%= user.specialty %></p>
-          </div>
-        </div>
-
-        <% if user.address %>
-          <div class="text-sm text-gray-500">
-            <p><%= user.address.city %>, <%= user.address.state %>, <%= user.address.country %></p>
-          </div>
-        <% end %>
-        <p class="text-gray-600 text-sm"><%= user.email %></p>
+    <select id="specialty-filter" class="px-4 py-2 border rounded shadow-sm">
+      <option value="">All Specialties</option>
+      <% @users.map(&:specialty).uniq.compact.each do |specialty| %>
+        <option value="<%= specialty.downcase %>"><%= specialty %></option>
       <% end %>
-    <% end %>
+    </select>
   </div>
 
+  <!-- Results -->
+  <div id="results-wrapper" class="overflow-hidden">
+    <div id="results-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 justify-center max-h-[470px] overflow-hidden transition-all duration-300 ease-in-out">
+      <% @users.each do |user| %>
+        <%= link_to user_path(user), class: "block result-card h-[220px] w-full max-w-xs bg-white border rounded-lg p-4 shadow-md transition-transform duration-300 ease-in-out hover:shadow-gray-800 overflow-hidden" do %>
+          <div class="flex items-center gap-4 mb-4">
+            <% if user.profile_picture.attached? %>
+              <%= image_tag user.profile_picture.variant(resize_to_fill: [64, 64]), class: "w-16 h-16 rounded-full object-cover border" %>
+            <% else %>
+              <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm border">
+                No image
+              </div>
+            <% end %>
+
+            <div class="flex-1 min-w-0">
+              <h2 class="text-base font-semibold text-gray-900 truncate"><%= user.name %></h2>
+              <p class="text-gray-600 text-sm truncate"><%= user.specialty %></p>
+            </div>
+          </div>
+
+          <% if user.address %>
+            <p class="text-sm text-gray-500 truncate"><%= user.address.city %>, <%= user.address.state %>, <%= user.address.country %></p>
+          <% end %>
+          <p class="text-gray-600 text-sm truncate"><%= user.email %></p>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- See More Button -->
+  <div class="flex justify-center mt-4">
+    <button id="see-more-btn" class="hidden text-gray-600 text-sm underline hover:text-blue-800">See more</button>
+  </div>
+
+  <!-- Map -->
   <div id="map" class="mt-10 h-[400px] rounded-lg shadow-md"></div>
 </div>
 
-<!-- Filtering Logic -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("turbo:load", () => {
     const input = document.getElementById("search-input");
+    const filter = document.getElementById("specialty-filter");
     const cards = document.querySelectorAll(".result-card");
+    const grid = document.getElementById("results-grid");
+    const wrapper = document.getElementById("results-wrapper");
+    const seeMoreBtn = document.getElementById("see-more-btn");
 
-    input.addEventListener("input", () => {
+    const filterCards = () => {
       const query = input.value.toLowerCase();
+      const selectedSpecialty = filter.value;
+      let visibleCount = 0;
+
       cards.forEach(card => {
         const text = card.innerText.toLowerCase();
-        card.classList.toggle("hidden", !text.includes(query));
+        const specialtyMatch = selectedSpecialty === "" || text.includes(selectedSpecialty);
+        const textMatch = text.includes(query);
+
+        if (textMatch && specialtyMatch) {
+          card.classList.remove("hidden");
+          visibleCount++;
+        } else {
+          card.classList.add("hidden");
+        }
       });
+
+      checkSeeMoreVisibility();
+    };
+
+    // Toggle "See more" functionality
+    let expanded = false;
+    seeMoreBtn.addEventListener("click", () => {
+      expanded = !expanded;
+      if (expanded) {
+        grid.classList.remove("max-h-[470px]", "overflow-hidden");
+        seeMoreBtn.innerText = "See less";
+      } else {
+        grid.classList.add("max-h-[470px]", "overflow-hidden");
+        seeMoreBtn.innerText = "See more";
+        grid.scrollIntoView({ behavior: "smooth" });
+      }
     });
+
+    // Check if "See more" button is necessary
+    const checkSeeMoreVisibility = () => {
+      const anyVisible = [...cards].filter(card => !card.classList.contains("hidden")).length > 0;
+      const hasOverflow = grid.scrollHeight > grid.clientHeight;
+
+      if (anyVisible && hasOverflow) {
+        seeMoreBtn.classList.remove("hidden");
+      } else {
+        seeMoreBtn.classList.add("hidden");
+      }
+    };
+
+    // Trigger check after initial DOM render
+    setTimeout(() => {
+      checkSeeMoreVisibility();
+    }, 100);
+
+    input.addEventListener("input", filterCards);
+    filter.addEventListener("change", filterCards);
   });
 </script>
 
-<!-- Google Maps -->
-<script async defer
+
+<script async
   src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_MAPS_API_KEY'] %>&callback=initMap">
 </script>
 
@@ -66,43 +131,58 @@
   function initMap() {
     const map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
-      center: { lat: 39.5, lng: -98.35 }, // Center of USA
+      center: { lat: 39.5, lng: -98.35 },
     });
 
-    const users = <%= raw(
+    const markers = <%= raw(
       @users.select { |u| u.address&.latitude && u.address&.longitude }.map do |user|
         {
-          lat: user.address.latitude,
-          lng: user.address.longitude,
-          url: user_path(user),
+          position: {
+            lat: user.address.latitude,
+            lng: user.address.longitude
+          },
+          title: "#{user.name} — #{user.specialty}",
           name: user.name,
           specialty: user.specialty,
           city: user.address.city,
-          state: user.address.state
+          state: user.address.state,
+          url: user_path(user),
+          image: user.profile_picture.attached? ? url_for(user.profile_picture.variant(resize_to_fill: [64, 64])) : nil
         }
       end.to_json
     ) %>;
 
-  users.forEach(user => {
-    const marker = new google.maps.Marker({
-      position: { lat: user.lat, lng: user.lng },
-      map: map,
-    });
+    const infoWindow = new google.maps.InfoWindow();
 
-    const infoWindow = new google.maps.InfoWindow({
-      content: `
-        <div style="font-family: sans-serif; line-height: 1.4;">
-          <strong>${user.name}</strong><br/>
-          <em>${user.specialty || ''}</em><br/>
-          ${user.city && user.state ? `<small>${user.city}, ${user.state}</small><br/>` : ''}
-          <a href="${user.url}" style="color: #3b82f6; text-decoration: underline;">View Profile</a>
-        </div>
-      `
-    });
+    markers.forEach(markerData => {
+      const marker = new google.maps.Marker({
+        position: markerData.position,
+        map: map,
+        title: markerData.title
+      });
 
-    marker.addListener("click", () => {
-      infoWindow.open(map, marker);
+      marker.addListener("click", () => {
+        const content = `
+          <div class="p-2 h-min flex items-center justify-center">
+            <div class="flex gap-3 items-center">
+              ${
+                markerData.image
+                  ? `<img src="${markerData.image}" class="w-12 h-12 rounded-full object-cover border" />`
+                  : `<div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-sm text-gray-600">No Img</div>`
+              }
+              <div class="flex-1 text-center">
+                <p class="text-sm font-semibold">${markerData.name}</p>
+                <p class="text-xs text-gray-600">${markerData.specialty}</p>
+                <p class="text-xs text-gray-500">${markerData.city}, ${markerData.state}</p>
+                <a href="${markerData.url}" class="text-blue-600 text-xs hover:underline">View Profile</a>
+              </div>
+            </div>
+          </div>
+        `;
+        infoWindow.setContent(content);
+        infoWindow.open(map, marker);
+      });
     });
-  });
   }
 </script>
+
