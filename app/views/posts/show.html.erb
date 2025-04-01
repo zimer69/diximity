@@ -1,0 +1,48 @@
+<div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+  <article class="prose prose-lg mx-auto">
+    <header class="mb-12">
+      <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+        <time datetime="<%= @post.published_at.iso8601 %>">
+          <%= @post.published_at.strftime("%B %d, %Y") %>
+        </time>
+        <% if @post.source.present? %>
+          <span class="text-gray-300">•</span>
+          <span class="text-gray-600">
+            <% if @post.source =~ URI::DEFAULT_PARSER.make_regexp %>
+              <a href="<%= @post.source %>" target="_blank" rel="noopener" class="hover:text-gray-900">
+                <%= URI.parse(@post.source).host %>
+              </a>
+            <% else %>
+              <%= @post.source %>
+            <% end %>
+          </span>
+        <% end %>
+      </div>
+
+      <h1 class="text-4xl font-serif font-bold text-gray-900 mb-8 leading-tight">
+        <%= @post.title %>
+      </h1>
+
+      <% if @post.image_url.present? %>
+        <figure class="my-8">
+          <img src="<%= @post.image_url %>" 
+               alt="<%= @post.title %>" 
+               class="w-full h-auto">
+        </figure>
+      <% end %>
+    </header>
+
+    <div class="text-gray-700 leading-relaxed">
+      <%= @post.body %>
+    </div>
+  </article>
+
+  <div class="mt-12 flex justify-center">
+    <%= link_to root_path, class: "text-gray-600 hover:text-gray-900 inline-flex items-center text-sm" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Posts
+    <% end %>
+  </div>
+</div>
