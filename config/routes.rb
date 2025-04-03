@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       patch :mark_as_read
     end
   end
-  resources :connections, only: [:create, :destroy] do
+  resources :connections, only: %i[index create destroy] do
     member do
       patch :accept
       delete :reject

@@ -4,7 +4,7 @@
   </p>
 
   <%= link_to "Sign out", destroy_user_session_path, method: :delete,
-      data: { turbo_method: :delete },
+      data: { turbo_method: :delete, confirm: "Are you sure you want to logout?" },
       class: "inline-block bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" %>
 <% else %>
   <%= link_to "Log in", new_user_session_path,

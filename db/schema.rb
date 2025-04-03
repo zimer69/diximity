@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_02_214239) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_03_190054) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,7 +66,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_02_214239) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["connected_user_id", "user_id"], name: "index_connections_on_connected_user_id_and_user_id", unique: true
     t.index ["connected_user_id"], name: "index_connections_on_connected_user_id"
+    t.index ["user_id", "connected_user_id"], name: "index_connections_on_user_id_and_connected_user_id", unique: true
     t.index ["user_id"], name: "index_connections_on_user_id"
   end
 
