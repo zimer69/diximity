@@ -9,6 +9,7 @@ class NotificationsController < ApplicationController
 
   def mark_as_read
     @notification.mark_as_read
+    redirect_back fallback_location: root_path
   end
 
   private

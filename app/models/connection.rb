@@ -3,10 +3,9 @@ class Connection < ApplicationRecord
   
   belongs_to :user
   belongs_to :connected_user, class_name: "User"
-  has_many :notifications
+  has_many :notifications, dependent: :destroy
 
   after_initialize :set_default_status, if: :new_record?
-  before_destroy :mark_notification_as_read
   after_update :mark_notification_as_read, if: :saved_change_to_status?
 
   private
@@ -16,6 +15,7 @@ class Connection < ApplicationRecord
   end
 
   def mark_notification_as_read
-    self.notifications.last.mark_as_read
+    notification = self.notifications.find_by(notification_type: "connection_request")
+    notification.mark_as_read if notification.present?
   end
 end

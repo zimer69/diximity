@@ -39,8 +39,6 @@ class ConnectionsController < ApplicationController
   end
 
   def reject
-    puts '*' * 2000
-    puts @connection
     if @connection.connected_user == current_user
       @connection.destroy
       redirect_back fallback_location: root_path, notice: "Connection rejected."
@@ -50,6 +48,7 @@ class ConnectionsController < ApplicationController
   end
 
   def destroy
+    puts '*' * 5000
     connection = Connection.find_by(user_id: current_user.id, connected_user_id: params[:id]) ||
                  Connection.find_by(user_id: params[:id], connected_user_id: current_user.id)
     if connection
