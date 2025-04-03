@@ -1,0 +1,44 @@
+<!-- app/views/connections/index.html.erb -->
+<div class="container mx-auto px-6 py-8 max-w-5xl">
+  <h1 class="text-3xl font-semibold text-gray-900 mb-8">Your Connections</h1>
+
+  <% if @connections.any? %>
+    <div class="space-y-6">
+      <% @connections.each do |connection| %>
+        <% user = (connection.user_id == current_user.id ? connection.connected_user : connection.user) %>
+        <%= link_to user_path(user), class: "text-blue-600 hover:text-blue-700 font-medium" do %>
+            <div class="bg-white shadow rounded-lg p-6 flex items-center gap-6 hover:shadow-xl transition-all duration-300 relative">
+                <!-- Profile Picture -->
+                <div class="flex-shrink-0">
+                    <% if user.profile_picture.attached? %>
+                        <%= image_tag user.profile_picture.variant(resize_to_fill: [100, 100]), class: "w-24 h-24 rounded-full object-cover" %>
+                    <% else %>
+                        <div class="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
+                            <span class="text-xl">👤</span>
+                        </div>
+                    <% end %>
+                </div>
+
+               <!-- User Info -->
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-800"><%= user.name %></h2>
+                    <p class="text-gray-600 text-sm"><%= user.specialty %></p>
+                    <p class="mt-2 text-gray-500 text-sm"><%= user.profile_summary %></p>
+                </div>
+                <div> 
+                    <p class="text-sm font-semibold text-gray-800"> Connected on <%= l(connection.created_at, format: :long) %> </p>
+                </div>
+                <div class="absolute top-1 right-1 flex gap-2">
+                    <%= button_to '#', method: :delete, title: "Send Message", class: "hover:scale-110 duration-100" do %>
+                        <span class="cursor-pointer text-xl">✉</span>
+                    <% end %>
+                    <%= button_to connection_path(connection), title: "Remove Connection", method: :delete, class: "hover:scale-110 duration-100", data: { confirm: "Are you sure you want to remove this connection?" } do %>
+                        <span class="cursor-pointer text-lg">❌</span>
+                    <% end %>
+                </div>
+            </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>  
+</div>

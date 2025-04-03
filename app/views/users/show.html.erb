@@ -44,35 +44,53 @@
             ✏️ <span class="ml-1">Edit Profile</span>
           <% end %>
         </div>
-
-      <% elsif current_user.connected_with?(@user) %>
-        <!-- Already connected -->
-        <div class="mt-4 text-center">
-          <span class="inline-flex items-center bg-purple-100 text-purple-800 px-4 py-2 rounded text-sm">
-            <span class="ml-1">💬 Message</span>
-          </span>
-          <%= button_to "Remove Connection", connection_path(user_id: @user.id), method: :delete, class: "text-xs text-red-600 hover:underline" %>
-        </div>
-
-      <% elsif (pending = Connection.find_by(user_id: current_user.id, connected_user_id: @user.id, status: "pending")) %>
-        <!-- Pending request with cancel option -->
-        <div class="mt-4 flex flex-col items-center">
-          <span class="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded text-sm mb-2">
-            <span class="ml-1">⏳ Pending Request</span>
-          </span>
-          <%= button_to "Cancel Request", connection_path(user_id: @user.id), method: :delete, class: "text-xs text-red-600 hover:underline" %>
-        </div>
-
       <% else %>
-        <!-- Not connected -->
-        <div class="mt-4 text-center">
-          <%= button_to connections_path(user_id: @user.id),
-                        method: :post,
-                        form: { data: { turbo: false } },
-                        class: "..." do %>
-            <span class="mr-1">➕ Connect</span>
-          <% end %>
-        </div>
+        <% if current_user.connected_with?(@user) %>
+          <!-- Already connected -->
+          <div class="mt-4 text-center">
+            <span class="inline-flex items-center bg-purple-100 text-purple-800 px-4 py-2 rounded text-sm">
+              <span class="ml-1">💬 Message</span>
+            </span>
+            <%= button_to "Remove Connection", connection_path(user_id: @user.id), method: :delete, data: { confirm: "Are you sure you want to remove this connection?" }, class: "text-xs text-red-600 hover:underline" %>
+          </div>
+        <% elsif (pending = Connection.find_by(user_id: @user.id, connected_user_id: current_user.id, status: "pending")) %>
+          <div class="mt-3 flex-row gap-3">
+            <p class="text-sm text-gray-600 mb-2">
+              <strong><%= @user.name %></strong> wants to <br>connect with you.
+            </p>
+            <div class='flex gap-2 justify-center'>
+              <%= button_to accept_connection_path(pending), 
+                  method: :patch, 
+                  class: "text-xl hover:scale-120 duration-300" do %>
+                <span>✅</span>
+              <% end %>
+              <%= button_to reject_connection_path(pending), 
+                  method: :delete,
+                  data: { confirm: "Are you sure you want to reject this connection?" },
+                  class: "text-xl hover:scale-120 duration-300" do %>
+                <span>❌</span>
+              <% end %>
+            </div>
+          </div>
+        <% elsif (pending = Connection.find_by(user_id: current_user.id, connected_user_id: @user.id, status: "pending")) %>
+          <!-- Pending request with cancel option -->
+          <div class="mt-4 flex flex-col items-center">
+            <span class="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded text-sm mb-2">
+              <span class="ml-1">⏳ Pending Request</span>
+            </span>
+            <%= button_to "Cancel Request", connection_path(user_id: @user.id), method: :delete, data: { confirm: "Are you sure you want to cancel this request?" }, class: "text-xs text-red-600 hover:underline" %>
+          </div>
+        <% else %>
+          <!-- Not connected -->
+          <div class="mt-4 text-center">
+            <%= button_to connections_path(user_id: @user.id),
+                          method: :post,
+                          form: { data: { turbo: false } },
+                          class: "..." do %>
+              <span class="mr-1">➕ Connect</span>
+            <% end %>
+          </div>
+        <% end %>
       <% end %>
     </div>
 

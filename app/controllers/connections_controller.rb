@@ -1,6 +1,16 @@
 class ConnectionsController < ApplicationController
+  include Pagy::Backend
+
   before_action :authenticate_user!
   before_action :find_connection, only: %i[accept reject]
+
+  def index
+    @pagy, @connections = pagy(
+      Connection.where("user_id = ? OR connected_user_id = ?", current_user.id, current_user.id)
+                .where(status: "accepted")
+                .includes(:user, :connected_user)
+    )
+  end
 
   def create
     connection = current_user.connections.build(
