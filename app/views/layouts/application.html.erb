@@ -24,51 +24,7 @@
   </head>
 
   <body>
-    <nav class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center space-x-2">
-          <%= link_to root_path, class: "flex items-center space-x-2" do %>
-            <%= image_tag("Diximity-logo.png", alt: "Diximity Logo", class: "h-20 w-auto") %>
-          <% end %>
-        </div>
-
-        <div class="flex space-x-6 items-center">
-          <% if user_signed_in? %>
-            <%= link_to "Feed", posts_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
-            <%= link_to "Profile", user_path(current_user), class: "text-gray-700 hover:text-blue-600 font-medium" %>
-            <%= link_to "Explore", explore_index_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
-            <div class="relative" data-controller="navbar-dropdown">
-              <button
-                type="button"
-                data-action="click->navbar-dropdown#toggle"
-                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-                </svg>
-              </button>
-
-              <div
-                data-navbar-dropdown-target="menu"
-                class="hidden absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-50"
-              >
-                <div class="py-1 text-sm text-gray-700">
-                  <%= link_to "📜 About Us", "#", class: "block px-4 py-2 hover:bg-gray-100" %>
-                  <%= link_to "📞 Contact", "#", class: "block px-4 py-2 hover:bg-gray-100" %>
-                  <%= button_to "🚪 Sign Out", destroy_user_session_path,
-                        method: :delete,
-                        form: { data: { turbo: false } },
-                        class: "w-full text-left px-4 py-2 text-red-600 hover:bg-red-100" %>
-                </div>
-              </div>
-            </div>
-          <% else %>
-            <%= link_to "Sign in", new_user_session_path, class: "text-sm text-blue-600 hover:underline" %>
-            <%= link_to "Sign up", new_user_registration_path, class: "ml-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm" %>
-          <% end %>
-        </div>
-      </div>
-    </nav>
+    <%= render "layouts/navbar" %>
 
     <% if notice %>
       <div class="flash bg-green-100 text-green-800 p-3 mb-4 mt-4 rounded shadow-md w-full max-w-2xl mx-auto text-center">

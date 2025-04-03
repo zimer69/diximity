@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "notifications/index"
   get "connections/create"
   get "connections/update"
   get "connections/destroy"
@@ -19,5 +20,15 @@ Rails.application.routes.draw do
 
   resources :posts, only: [:index, :show]
   resources :users, only: [:index, :show, :update]
-  resources :connections, only: [:create, :update, :destroy]
+  resources :notifications, only: [:index, :update, :destroy] do
+    member do
+      patch :mark_as_read
+    end
+  end
+  resources :connections, only: [:create, :destroy] do
+    member do
+      patch :accept
+      delete :reject
+    end
+  end
 end

@@ -1,6 +1,6 @@
 class ExploreController < ApplicationController
   def index
-    @users = User.includes(:address).where.not(addresses: { latitude: nil, longitude: nil })
+    @users = User.includes(:address)
 
     # Search filters
     @users = @users.where("users.name ILIKE ?", "%#{params[:name]}%") if params[:name].present?
