@@ -37,7 +37,8 @@
                           <span class="mr-1">✓</span> Accept
                         <% end %>
                         <%= button_to reject_connection_path(notification.connection), 
-                            method: :delete, 
+                            method: :delete,
+                            data: { confirm: "Are you sure you want to remove this connection?" },
                             class: "inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
                           <span class="mr-1">✕</span> Reject
                         <% end %>
@@ -60,7 +61,7 @@
                   <p class="text-gray-800"><%= notification.message %></p>
                   <%= button_to mark_as_read_notification_path(notification), 
                       method: :patch, 
-                      class: "absolute bottom-2 right-2 text-xs text-blue-600 hover:underline" do %>
+                      class: "absolute bottom-2 right-2 text-xs text-blue-600 cursor-pointer" do %>
                     ✔ Mark as read
                   <% end %>
                 <% end %>
@@ -133,7 +134,7 @@
                           <% end %>
                           <%= button_to connection_path(notification.connection), 
                               method: :delete, 
-                              class: "inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                              class: "inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", data: { confirm: "Are you sure you want to remove this connection?" } do %>
                             <span class="mr-1">✕</span> Reject
                           <% end %>
                         </div>
