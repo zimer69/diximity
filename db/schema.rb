@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_04_225119) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_05_004941) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,6 +60,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_04_225119) do
     t.index ["user_id"], name: "index_addresses_on_user_id"
   end
 
+  create_table "chats", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "connection_id"
+    t.index ["connection_id"], name: "index_chats_on_connection_id", unique: true
+  end
+
   create_table "connections", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "connected_user_id", null: false
@@ -70,6 +77,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_04_225119) do
     t.index ["connected_user_id"], name: "index_connections_on_connected_user_id"
     t.index ["user_id", "connected_user_id"], name: "index_connections_on_user_id_and_connected_user_id", unique: true
     t.index ["user_id"], name: "index_connections_on_user_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "chat_id", null: false
+    t.bigint "user_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_id"], name: "index_messages_on_chat_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -117,5 +134,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_04_225119) do
   add_foreign_key "addresses", "users"
   add_foreign_key "connections", "users"
   add_foreign_key "connections", "users", column: "connected_user_id"
+  add_foreign_key "messages", "chats"
+  add_foreign_key "messages", "users"
   add_foreign_key "notifications", "users"
 end
