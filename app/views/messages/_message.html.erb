@@ -1,0 +1,28 @@
+<div data-controller="chat-messages" class="p-4">
+  <div class="<% if message.user_id == current_user_id %> flex justify-end <% else %> flex justify-start <% end %>">
+    <div class="flex items-start gap-2">
+      <% if message.user_id != current_user_id %>
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+            <span class="text-gray-600 font-medium"><%= message.user.name.split.map(&:first).join[0..1].upcase %></span>
+          </div>
+        </div>
+      <% end %>
+      <div class="flex-column">
+        <div class="p-4 text-white <% if message.user_id == current_user_id %> bg-blue-900 rounded-xl justify-self-end <% else %> bg-green-900 rounded-xl justify-self-start <% end %>">
+          <%= message.content %>
+        </div>
+        <div class="text-sm text-gray-400 mt-1 <% if message.user_id == current_user_id %>justify-self-end <% else %> justify-self-start <% end %>">
+          <%= message.created_at.strftime("%H:%M") %>
+        </div>
+      </div>
+      <% if message.user_id == current_user_id %>
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+            <span class="text-gray-600 font-medium"><%= message.user.name.split.map(&:first).join[0..1].upcase %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

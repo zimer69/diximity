@@ -38,5 +38,6 @@ module Diximity
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+    config.middleware.use Warden::Manager
   end
 end

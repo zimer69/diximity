@@ -4,6 +4,7 @@ class Connection < ApplicationRecord
   belongs_to :user
   belongs_to :connected_user, class_name: "User"
   has_many :notifications, dependent: :destroy
+  has_one :chat, dependent: :destroy
 
   after_initialize :set_default_status, if: :new_record?
   after_update :mark_notification_as_read, if: :saved_change_to_status?

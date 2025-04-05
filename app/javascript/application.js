@@ -4,5 +4,9 @@ window.Rails = Rails
 
 import "@hotwired/turbo-rails"
 import "controllers"
+import { Application } from "@hotwired/stimulus"
+const application = Application.start()
 
-console.log("✅ application.js loaded — Rails UJS started")
+window.stimulus = application
+
+export { application }
