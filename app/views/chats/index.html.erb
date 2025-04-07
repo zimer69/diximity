@@ -1,0 +1,72 @@
+<!-- app/views/chats/index.html.erb -->
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900">Messages</h1>
+    <p class="text-sm text-gray-500"><%= pluralize(@chats.count, 'conversation') %></p>
+  </div>
+
+  <% if @chats.any? %>
+    <div class="space-y-1">
+      <% @chats.each do |chat| %>
+        <% other_user = chat.other_user(current_user) %>
+        <% last_message = chat.messages.last %>
+        
+        <%= link_to chat_path(chat), class: "block" do %>
+          <div class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+            <!-- Profile Picture -->
+            <div class="flex-shrink-0">
+              <% if other_user.profile_picture.attached? %>
+                <%= image_tag other_user.profile_picture.variant(resize_to_fill: [48, 48]), 
+                    class: "w-12 h-12 rounded-full object-cover" %>
+              <% else %>
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500">
+                  <span class="text-xl">👤</span>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- User Info and Last Message -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-3">
+                <h2 class="text-base font-medium text-gray-900 truncate"><%= other_user.name %></h2>
+                <% if last_message %>
+                  <span class="text-xs text-gray-400">
+                    <%= time_ago_in_words(last_message.created_at) %> ago
+                  </span>
+                <% end %>
+              </div>
+              
+              <% if last_message %>
+                <div class="flex items-center gap-2">
+                  <div class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs
+                      <%= last_message.user == current_user ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500' %>">
+                    <%= last_message.user == current_user ? 'You' : other_user.name.first %>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">
+                    <%= last_message.content %>
+                  </p>
+                </div>
+              <% else %>
+                <p class="text-sm text-gray-400">No messages yet</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="max-w-md mx-auto">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <span class="text-2xl">💬</span>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+        <p class="text-sm text-gray-600 mb-4">Start a conversation with your connections to begin messaging.</p>
+        <%= link_to connections_path, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <span class="mr-1">👥</span>
+          View Connections
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div> 

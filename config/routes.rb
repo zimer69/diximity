@@ -32,7 +32,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :chats, only: [:create, :show] do
-    resources :messages
+  resources :chats, only: [:index, :show, :create] do
+    resources :messages, only: [:create]
   end
 end

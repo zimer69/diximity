@@ -11,6 +11,7 @@ class User < ApplicationRecord
   has_many :users_who_connected, through: :received_connections, source: :user
   has_many :notifications
   has_many :messages
+  has_many :chats, through: :connections
 
   accepts_nested_attributes_for :address, update_only: true
   devise :database_authenticatable, :registerable,
