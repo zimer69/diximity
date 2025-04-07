@@ -31,4 +31,7 @@ Rails.application.routes.draw do
       delete :reject
     end
   end
+  resources :chats, only: [:index, :show, :create] do
+    resources :messages, only: [:create]
+  end
 end

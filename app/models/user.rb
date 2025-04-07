@@ -10,8 +10,8 @@ class User < ApplicationRecord
   has_many :received_connections, class_name: 'Connection', foreign_key: 'connected_user_id'
   has_many :users_who_connected, through: :received_connections, source: :user
   has_many :notifications
-  has_many :sent_messages, class_name: "Message", foreign_key: "sender_id"
-  has_many :received_messages, class_name: "Message", foreign_key: "receiver_id"
+  has_many :messages
+  has_many :chats, through: :connections
 
   accepts_nested_attributes_for :address, update_only: true
   devise :database_authenticatable, :registerable,
@@ -30,5 +30,15 @@ class User < ApplicationRecord
       user_id: other_user.id,
       connected_user_id: self.id
     )
+  end
+
+  def connections
+    Connection.where("user_id = ? OR connected_user_id = ?", self.id, self.id)
+  end
+
+  def chats
+    @chats = Chat.joins(:connection)
+                .where("connections.user_id = ? OR connections.connected_user_id = ?", self.id, self.id)
+                .distinct
   end
 end

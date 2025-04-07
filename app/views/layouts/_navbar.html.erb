@@ -9,8 +9,8 @@
     <div class="flex space-x-6 items-center">
         <% if user_signed_in? %>
         <%= link_to "Feed", posts_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
-        <%= link_to "Profile", user_path(current_user), class: "text-gray-700 hover:text-blue-600 font-medium" %>
         <%= link_to "Explore", explore_index_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
+        <%= link_to "Profile", user_path(current_user), class: "text-gray-700 hover:text-blue-600 font-medium" %>
         <div class="relative" data-controller="navbar-dropdown">
             <button
                 type="button"
@@ -24,6 +24,9 @@
                 <% if current_user.notifications.where(read: false).any? %>
                 <span class="absolute top-1 right-1 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
                 <% end %>
+                <% if current_user.chats.joins(:messages).where(messages: { read: false }).where.not(messages: { user_id: current_user.id }).any? %>
+                    <span class="absolute top-1 right-1 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
+                <% end %>
             </button>
 
             <div
@@ -32,17 +35,23 @@
             >
             <div class="py-1 text-sm text-gray-700">
                 <%= link_to notifications_path, class: "block px-4 py-2 hover:bg-gray-100" do %>
-                    <% unread_count = current_user.notifications.where(read: false).count %>
-                    <% if unread_count > 0 %>
+                    <% unread_notifications = current_user.notifications.where(read: false).count %>
+                    <% if unread_notifications > 0 %>
                         <span class="inline-flex items-center justify-center w-4 h-4 bg-red-600 text-white text-xs font-semibold rounded-full">
-                            <%= unread_count %>
+                            <%= unread_notifications %>
                         </span>
                     <% else %>
                         <span class="inline-flex items-center justify-center w-4 h-4 bg-gray-300 text-white text-xs font-semibold rounded-full">
-                            <%= unread_count %>
+                            <%= unread_notifications %>
                         </span>
                     <% end %>
                     <span class="text-sm ml-1">Notifications</span>
+                <% end %>
+                <%= link_to chats_path, class: "block px-4 py-2 hover:bg-gray-100 relative" do %>
+                    <% if current_user.chats.joins(:messages).where(messages: { read: false }).where.not(messages: { user_id: current_user.id }).any? %>
+                        <span class="absolute top-2 right-4 w-2 h-2 bg-red-600 rounded-full"></span>
+                    <% end %>
+                    <span class="text-sm">💬 Messages</span>
                 <% end %>
                 <%= link_to "👥 Connections", connections_path, class: "block px-4 py-2 hover:bg-gray-100" %>
                 <%= link_to "📜 About Us", "#", class: "block px-4 py-2 hover:bg-gray-100" %>
