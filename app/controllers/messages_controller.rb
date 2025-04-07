@@ -3,11 +3,20 @@ class MessagesController < ApplicationController
   before_action :authenticate_user!
 
   def create
-    @message = @chat.messages.create(message_params)
-    @message.user = current_user
-    @message.save!
-
-    render json: {}, status: :no_content
+    if @chat.messages.empty?
+      @message = @chat.messages.create(message_params)
+      @message.user = current_user
+      @message.save!
+      redirect_to chat_path(@chat)
+    else
+      @message = @chat.messages.create(message_params)
+      @message.user = current_user
+      @message.save!
+      other_user = @chat.other_user(current_user)
+      @chat.messages.where(user: other_user, read: false).update_all(read: true)
+  
+      render json: {}, status: :no_content
+    end
   end
 
   def show

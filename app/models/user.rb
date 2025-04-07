@@ -31,4 +31,14 @@ class User < ApplicationRecord
       connected_user_id: self.id
     )
   end
+
+  def connections
+    Connection.where("user_id = ? OR connected_user_id = ?", self.id, self.id)
+  end
+
+  def chats
+    @chats = Chat.joins(:connection)
+                .where("connections.user_id = ? OR connections.connected_user_id = ?", self.id, self.id)
+                .distinct
+  end
 end
