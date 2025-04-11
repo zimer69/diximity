@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_07_201548) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_10_050822) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,6 +58,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_07_201548) do
     t.bigint "user_id"
     t.index ["deleted_at"], name: "index_addresses_on_deleted_at"
     t.index ["user_id"], name: "index_addresses_on_user_id"
+  end
+
+  create_table "ads", force: :cascade do |t|
+    t.string "title"
+    t.text "content"
+    t.string "target_url"
+    t.integer "clicks", default: 0
+    t.string "position"
+    t.string "specialty"
+    t.datetime "last_clicked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "image_url"
+    t.jsonb "page_clicks"
+    t.jsonb "user_clicks"
   end
 
   create_table "chats", force: :cascade do |t|

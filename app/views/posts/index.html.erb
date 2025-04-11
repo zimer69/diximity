@@ -1,3 +1,5 @@
+<% fetch_ads_for_user %>
+
 <div class="max-w-2xl mx-auto px-4">
   <h1 class="text-4xl font-bold mb-6 justify-center">Latest News</h1>
 
@@ -7,5 +9,21 @@
 
   <div class="mt-8">
     <%= render partial: "load_more", locals: { pagy: @pagy } %>
+  </div>
+
+  <div class="ads-container">
+    <!-- Left-Side Ad -->
+    <% if @ads_left.any? %>
+      <div class="ad-left">
+        <%= render 'ads/ad', ad: @ads_left.first %> <!-- Display first ad on the left -->
+      </div>
+    <% end %>
+
+    <!-- Right-Side Ad -->
+    <% if @ads_right.any? %>
+      <div class="ad-right">
+        <%= render 'ads/ad', ad: @ads_right.first, page: 'posts/index' %> <!-- Display first ad on the right -->
+      </div>
+    <% end %>
   </div>
 </div>

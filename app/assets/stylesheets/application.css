@@ -1,1 +1,23 @@
 @import "tailwind/application.css";
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.position-left {
+  left: 8rem;
+  animation: float 4s ease-in-out infinite;
+}
+
+.position-right {
+  right: 8rem;
+  animation: float 4s ease-in-out infinite;
+}
