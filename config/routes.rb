@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :admin_users
   get "notifications/index"
   get "connections/create"
   get "connections/update"
