@@ -1,0 +1,85 @@
+<div class="py-6">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-blue-600 rounded-lg shadow-lg p-6 text-white">
+      <h3 class="text-lg font-medium mb-2">Total Users</h3>
+      <p class="text-3xl font-bold mb-4"><%= @total_users %></p>
+      <%= link_to 'View Users', admin_users_path, class: 'text-white hover:text-blue-200' %>
+    </div>
+    <div class="bg-green-600 rounded-lg shadow-lg p-6 text-white">
+      <h3 class="text-lg font-medium mb-2">Total Posts</h3>
+      <p class="text-3xl font-bold mb-4"><%= @total_posts %></p>
+      <%= link_to 'View Posts', admin_posts_path, class: 'text-white hover:text-green-200' %>
+    </div>
+    <div class="bg-indigo-600 rounded-lg shadow-lg p-6 text-white">
+      <h3 class="text-lg font-medium mb-2">Total Ads</h3>
+      <p class="text-3xl font-bold mb-4"><%= @total_ads %></p>
+      <%= link_to 'View Ads', admin_ads_path, class: 'text-white hover:text-indigo-200' %>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Recent Users -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Recent Users</h3>
+      </div>
+      <div class="divide-y divide-gray-200">
+        <% @recent_users.each do |user| %>
+          <div class="px-6 py-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= user.name %></p>
+                <p class="text-sm text-gray-500"><%= user.email %></p>
+              </div>
+              <span class="text-sm text-gray-500"><%= time_ago_in_words(user.created_at) %> ago</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Recent Posts -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Recent Posts</h3>
+      </div>
+      <div class="divide-y divide-gray-200">
+        <% @recent_posts.each do |post| %>
+          <div class="px-6 py-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= post.title %></p>
+                <p class="text-sm text-gray-500"><%= truncate(post.body, length: 50) %></p>
+              </div>
+              <span class="text-sm text-gray-500"><%= time_ago_in_words(post.created_at) %> ago</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Recent Ads -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Recent Ads</h3>
+      </div>
+      <div class="divide-y divide-gray-200">
+        <% @recent_ads.each do |ad| %>
+          <div class="px-6 py-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= ad.title %></p>
+                <p class="text-sm text-gray-500">Budget:</p>
+              </div>
+              <span class="text-sm text-gray-500"><%= time_ago_in_words(ad.created_at) %> ago</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div> 

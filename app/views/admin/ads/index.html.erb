@@ -1,0 +1,51 @@
+<div class="py-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Ads</h1>
+  </div>
+
+  <div class="bg-white shadow rounded-lg">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Advertiser</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @ads.each do |ad| %>
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= admin_ad_path(ad) %>'">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900"><%= ad.title %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <% if ad.image_url.present? %>
+                      <%= image_tag ad.image_url, class: "h-10 w-10 rounded-full" %>
+                    <% end %>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center space-x-2">
+                  <div class="text-sm text-gray-900">
+                    <span class="font-medium"><%= ad.clicks %></span> clicks
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <%= link_to 'Performance', performance_admin_ad_path(ad), class: 'text-indigo-600 hover:text-indigo-900 mr-2' %>
+                <%= link_to 'Edit', edit_admin_ad_path(ad), class: 'text-indigo-600 hover:text-indigo-900' %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> 

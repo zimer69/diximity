@@ -126,6 +126,8 @@ GEM
       csv (>= 3.0.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    groupdate (6.5.1)
+      activesupport (>= 7)
     hashie (5.0.0)
     httparty (0.23.0)
       csv
@@ -391,6 +393,7 @@ DEPENDENCIES
   dotenv-rails
   faker
   geocoder (~> 1.8, >= 1.8.5)
+  groupdate
   image_processing
   importmap-rails
   jbuilder

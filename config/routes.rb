@@ -41,4 +41,15 @@ Rails.application.routes.draw do
       post 'track_click'
     end
   end
+
+  namespace :admin do
+    root 'dashboard#index'
+    resources :users
+    resources :posts
+    resources :ads do
+      member do
+        get 'performance'
+      end
+    end
+  end
 end
