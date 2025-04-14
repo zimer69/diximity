@@ -39,9 +39,7 @@ class Admin::AdsController < Admin::BaseController
 
   def performance
     # Get total clicks and impressions
-    @clicks = @ad.clicks.count
-    @impressions = @ad.impressions.count
-    @ctr = @impressions > 0 ? (@clicks.to_f / @impressions * 100) : 0
+    @clicks = @ad.clicks
 
     # Get daily stats for the last 30 days
     @daily_stats = {}

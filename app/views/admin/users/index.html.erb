@@ -6,6 +6,21 @@
     </div>
   </div>
 
+  <div class="mt-4 flex flex-col md:flex-row justify-center items-center gap-4">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search by name, email, or specialty..."
+      class="w-full max-w-xl px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+    />
+    <select id="specialty-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Specialties</option>
+      <% @users.map(&:specialty).uniq.compact.each do |specialty| %>
+        <option value="<%= specialty.downcase %>"><%= specialty %></option>
+      <% end %>
+    </select>
+  </div>
+
   <div class="mt-8 flex flex-col">
     <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -13,7 +28,7 @@
           <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
               <tr>
-                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">User</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Specialty</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
@@ -25,9 +40,22 @@
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
               <% @users.each do |user| %>
-                <tr class="hover:bg-gray-50 cursor-pointer" data-controller="clickable-row" data-action="click->clickable-row#navigate" data-url="<%= admin_user_path(user) %>">
+                <tr class="searchable-row hover:bg-gray-50 cursor-pointer" data-controller="clickable-row" data-action="click->clickable-row#navigate" data-url="<%= admin_user_path(user) %>">
                   <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                    <%= user.name %>
+                    <div class="flex items-center">
+                      <div class="h-10 w-10 flex-shrink-0">
+                        <% if user.profile_picture.attached? %>
+                          <%= image_tag user.profile_picture, class: "h-10 w-10 rounded-full" %>
+                        <% else %>
+                          <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span class="text-gray-500 text-sm font-medium"><%= user.name.first %></span>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="ml-4">
+                        <%= user.name %>
+                      </div>
+                    </div>
                   </td>
                   <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= user.email %></td>
                   <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= user.specialty %></td>
@@ -56,4 +84,32 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
+
+<script>
+  document.addEventListener("turbo:load", () => {
+    const input = document.getElementById("search-input");
+    const filter = document.getElementById("specialty-filter");
+    const rows = document.querySelectorAll(".searchable-row");
+
+    const filterRows = () => {
+      const query = input.value.toLowerCase();
+      const selectedSpecialty = filter.value;
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const specialtyMatch = selectedSpecialty === "" || text.includes(selectedSpecialty);
+        const textMatch = text.includes(query);
+
+        if (textMatch && specialtyMatch) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
+        }
+      });
+    };
+
+    input.addEventListener("input", filterRows);
+    filter.addEventListener("change", filterRows);
+  });
+</script> 

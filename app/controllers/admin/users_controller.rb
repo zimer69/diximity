@@ -3,6 +3,10 @@ class Admin::UsersController < Admin::BaseController
 
   def index
     @users = User.all.order(created_at: :desc)
+    if params[:search].present?
+      @users = @users.where("name ILIKE :search OR email ILIKE :search OR specialty ILIKE :search", 
+                           search: "%#{params[:search]}%")
+    end
   end
 
   def show
@@ -31,6 +35,24 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def user_params
-    params.require(:user).permit(:email, :name, :bio, :avatar, :is_active)
+    params.require(:user).permit(
+      :name, 
+      :email, 
+      :bio, 
+      :specialty, 
+      :profile_summary, 
+      :profile_picture, 
+      :background_image, 
+      :is_active,
+      address_attributes: [
+        :id,
+        :address1,
+        :address2,
+        :city,
+        :state,
+        :zip,
+        :country
+      ]
+    )
   end
 end

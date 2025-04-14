@@ -1,51 +1,150 @@
-<div class="py-6">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Ads</h1>
-  </div>
-
-  <div class="bg-white shadow rounded-lg">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Advertiser</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <% @ads.each do |ad| %>
-            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= admin_ad_path(ad) %>'">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900"><%= ad.title %></div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10">
-                    <% if ad.image_url.present? %>
-                      <%= image_tag ad.image_url, class: "h-10 w-10 rounded-full" %>
-                    <% end %>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center space-x-2">
-                  <div class="text-sm text-gray-900">
-                    <span class="font-medium"><%= ad.clicks %></span> clicks
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <%= link_to 'Performance', performance_admin_ad_path(ad), class: 'text-indigo-600 hover:text-indigo-900 mr-2' %>
-                <%= link_to 'Edit', edit_admin_ad_path(ad), class: 'text-indigo-600 hover:text-indigo-900' %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-xl font-semibold text-gray-900">Ads</h1>
+      <p class="mt-2 text-sm text-gray-700">A list of all ads in the system.</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "New Ad", new_admin_ad_path, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto" %>
     </div>
   </div>
-</div> 
+
+  <div class="mt-4 flex flex-col md:flex-row justify-center items-center gap-4">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search by title, content, or specialty..."
+      class="w-full max-w-xl px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+    />
+    <select id="specialty-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Specialties</option>
+      <% @ads.map(&:specialty).uniq.compact.each do |specialty| %>
+        <option value="<%= specialty.downcase %>"><%= specialty %></option>
+      <% end %>
+    </select>
+    <select id="advertiser-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Advertisers</option>
+      <% @ads.map(&:target_url).uniq.compact.each do |url| %>
+        <% domain = URI.parse(url).host.gsub(/^www\./, '').split('.').first rescue url %>
+        <option value="<%= domain.downcase %>"><%= domain.capitalize %></option>
+      <% end %>
+    </select>
+    <select id="date-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Time</option>
+      <option value="today">Today</option>
+      <option value="week">Last Week</option>
+      <option value="month">Last Month</option>
+      <option value="year">Last Year</option>
+    </select>
+  </div>
+
+  <div class="mt-8 flex flex-col">
+    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+          <table class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Specialty</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Advertiser</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created</th>
+                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <% @ads.each do |ad| %>
+                <tr class="searchable-row hover:bg-gray-50 cursor-pointer" data-controller="clickable-row" data-action="click->clickable-row#navigate" data-url="<%= admin_ad_path(ad) %>">
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                    <%= ad.title %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <%= ad.specialty %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <%= URI.parse(ad.target_url).host.gsub(/^www\./, '').split('.').first.capitalize rescue ad.target_url %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <%= ad.created_at.strftime('%b %d, %Y') %>
+                  </td>
+                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <div class="flex justify-end gap-2">
+                      <%= link_to "View", admin_ad_path(ad), class: "text-indigo-600 hover:text-indigo-900" %>
+                      <%= button_to "Delete", admin_ad_path(ad),
+                          method: :delete,
+                          class: "text-red-600 hover:text-red-900",
+                          form: { data: { turbo_confirm: "Are you sure you want to delete this ad?" } } %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("turbo:load", () => {
+    const input = document.getElementById("search-input");
+    const specialtyFilter = document.getElementById("specialty-filter");
+    const advertiserFilter = document.getElementById("advertiser-filter");
+    const dateFilter = document.getElementById("date-filter");
+    const rows = document.querySelectorAll(".searchable-row");
+
+    const getDateRange = (range) => {
+      const now = new Date();
+      switch(range) {
+        case 'today':
+          return now.setHours(0, 0, 0, 0);
+        case 'week':
+          return new Date(now.setDate(now.getDate() - 7));
+        case 'month':
+          return new Date(now.setMonth(now.getMonth() - 1));
+        case 'year':
+          return new Date(now.setFullYear(now.getFullYear() - 1));
+        default:
+          return null;
+      }
+    };
+
+    const filterRows = () => {
+      const query = input.value.toLowerCase();
+      const selectedSpecialty = specialtyFilter.value;
+      const selectedAdvertiser = advertiserFilter.value;
+      const selectedDate = dateFilter.value;
+      const dateThreshold = getDateRange(selectedDate);
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const specialtyMatch = selectedSpecialty === "" || text.includes(selectedSpecialty);
+        const advertiserMatch = selectedAdvertiser === "" || text.includes(selectedAdvertiser);
+        const textMatch = text.includes(query);
+        
+        let dateMatch = true;
+        if (dateThreshold) {
+          const dateCell = row.querySelector('td:nth-child(4)');
+          if (dateCell) {
+            const adDate = new Date(dateCell.textContent.trim());
+            dateMatch = adDate >= dateThreshold;
+          }
+        }
+
+        if (textMatch && specialtyMatch && advertiserMatch && dateMatch) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
+        }
+      });
+    };
+
+    input.addEventListener("input", filterRows);
+    specialtyFilter.addEventListener("change", filterRows);
+    advertiserFilter.addEventListener("change", filterRows);
+    dateFilter.addEventListener("change", filterRows);
+  });
+</script> 
