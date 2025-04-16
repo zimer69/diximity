@@ -6,7 +6,7 @@
 
       <div class="p-4 space-y-2">
         <div class="text-xs text-gray-500 flex justify-between">
-          <span><%= post.published_at&.strftime('%b %d, %Y') %></span>
+          <span><%= post.created_at.strftime('%b %d, %Y') %></span>
           <span><%= post.source.presence || "Diximity News" %></span>
         </div>
 

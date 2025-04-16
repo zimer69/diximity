@@ -1,0 +1,72 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">My Calendar</h1>
+    <%= link_to "Add Time Slot", new_calendar_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Calendar View -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Calendar</h2>
+      <div id="calendar" class="calendar"></div>
+    </div>
+
+    <!-- Time Slots List -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Available Time Slots</h2>
+      <div class="space-y-4">
+        <% @calendars.each do |calendar| %>
+          <div class="border rounded-lg p-4 <%= calendar.status == 'scheduled' ? 'bg-gray-50' : 'bg-white' %>">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="font-medium"><%= calendar.date.strftime("%B %d, %Y") %></p>
+                <p class="text-sm text-gray-600">
+                  <%= calendar.start_time.strftime("%I:%M %p") %> - <%= calendar.end_time.strftime("%I:%M %p") %>
+                </p>
+                <% if calendar.status == 'scheduled' %>
+                  <p class="text-sm text-gray-600 mt-1">
+                    Scheduled with: <%= calendar.patient_name %>
+                  </p>
+                <% end %>
+              </div>
+              <div class="flex space-x-2">
+                <% if calendar.status == 'available' %>
+                  <%= link_to "Edit", edit_calendar_path(calendar), class: "text-indigo-600 hover:text-indigo-900" %>
+                  <%= button_to "Delete", calendar_path(calendar), method: :delete, class: "text-red-600 hover:text-red-900" %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_include_tag "https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js" %>
+<%= stylesheet_link_tag "https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      events: [
+        <% @calendars.each do |calendar| %>
+          {
+            title: '<%= calendar.status == 'scheduled' ? 'Scheduled' : 'Available' %>',
+            start: '<%= calendar.date.strftime("%Y-%m-%d") %>T<%= calendar.start_time.strftime("%H:%M:%S") %>',
+            end: '<%= calendar.date.strftime("%Y-%m-%d") %>T<%= calendar.end_time.strftime("%H:%M:%S") %>',
+            color: '<%= calendar.status == 'scheduled' ? '#EF4444' : '#10B981' %>'
+          },
+        <% end %>
+      ]
+    });
+    calendar.render();
+  });
+</script> 
