@@ -1,0 +1,58 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="text-3xl font-bold text-gray-900">Post Details</h1>
+    <div class="flex gap-3">
+      <%= link_to "Edit", edit_admin_post_path(@post), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <%= link_to "Back to Posts", admin_posts_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  </div>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <% if @post.image_url.present? %>
+        <div class="mb-6">
+          <img src="<%= @post.image_url %>" alt="Post image" class="w-full max-h-96 object-cover rounded-lg" />
+        </div>
+      <% end %>
+      
+      <h3 class="text-2xl font-bold text-gray-900 mb-4"><%= @post.title %></h3>
+    </div>
+
+    <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+      <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+        <div class="sm:col-span-1">
+          <dt class="text-sm font-medium text-gray-500">Source</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @post.source.presence || "Diximity News" %></dd>
+        </div>
+
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-gray-500">Content</dt>
+          <dd class="mt-1 text-sm text-gray-900 prose max-w-none">
+            <%= simple_format @post.body %>
+          </dd>
+        </div>
+
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-gray-500">Created At</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @post.created_at.strftime('%B %d, %Y at %I:%M %p') %></dd>
+        </div>
+
+        <div class="sm:col-span-2">
+          <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @post.updated_at.strftime('%B %d, %Y at %I:%M %p') %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="mt-6 flex justify-end">
+    <%= button_to "Delete Post", 
+        admin_post_path(@post), 
+        method: :delete,
+        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500",
+        form: { 
+          data: { turbo_confirm: "Are you sure you want to delete this post?" },
+          class: "inline-block"
+        } %>
+  </div>
+</div> 

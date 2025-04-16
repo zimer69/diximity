@@ -20,6 +20,8 @@ class User < ApplicationRecord
   after_initialize :build_address, if: -> { new_record? && address.nil? }
   validates :name, :bio, :specialty, presence: true
 
+  attribute :is_active, :boolean, default: true
+
   def connected_with?(other_user)
     Connection.exists?(
       status: 'accepted',

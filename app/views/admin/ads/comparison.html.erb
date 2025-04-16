@@ -1,0 +1,112 @@
+<div class="py-6">
+  <div class="flex items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mr-4">Ad Performance Comparison</h1>
+    <%= link_to 'Back to Ads', admin_ads_path, class: 'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap' %>
+  </div>
+
+  <!-- Comparison Chart -->
+  <div class="bg-white shadow rounded-lg p-6 mb-8">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Daily Clicks Comparison (Last 30 Days)</h2>
+    <div class="relative" style="height: 400px;">
+      <canvas id="comparisonChart" class="w-full h-full"></canvas>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Ad Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <% @ads.each do |ad| %>
+        <div class="border rounded-lg p-4">
+          <h3 class="font-medium text-gray-900"><%= ad.title %></h3>
+          <p class="text-sm text-gray-500">Position: <%= ad.position %></p>
+          <p class="text-sm text-gray-500">Total Clicks: <%= ad.total_clicks %></p>
+          <p class="text-sm text-gray-500">Last Click: <%= ad.last_clicked_at&.strftime("%b %d, %Y %H:%M") || 'Never' %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script>
+    document.addEventListener('turbo:load', function() {
+      const canvas = document.getElementById('comparisonChart');
+      if (!canvas) return;
+
+      // Destroy existing chart if it exists
+      if (window.comparisonChart) {
+        window.comparisonChart.destroy();
+      }
+
+      const ctx = canvas.getContext('2d');
+      const dailyStats = <%= raw @daily_stats_json %>;
+      const dates = Object.keys(dailyStats);
+      
+      // Generate colors for each ad
+      const colors = [
+        'rgb(79, 70, 229)',   // Indigo
+        'rgb(16, 185, 129)',  // Emerald
+        'rgb(245, 158, 11)',  // Amber
+        'rgb(239, 68, 68)',   // Red
+        'rgb(59, 130, 246)',  // Blue
+        'rgb(168, 85, 247)',  // Purple
+      ];
+
+      const datasets = [];
+      <% @ads.each_with_index do |ad, index| %>
+        const ad<%= ad.id %>Data = dates.map(date => dailyStats[date][<%= ad.id %>].clicks);
+        datasets.push({
+          label: '<%= ad.title %> (<%= ad.position %>)',
+          data: ad<%= ad.id %>Data,
+          borderColor: colors[<%= index %> % colors.length],
+          backgroundColor: colors[<%= index %> % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: colors[<%= index %> % colors.length],
+          fill: true,
+          tension: 0.1
+        });
+      <% end %>
+
+      window.comparisonChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              },
+              grid: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</div> 

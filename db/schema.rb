@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_10_050822) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_14_225159) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_10_050822) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "ad_clicks", force: :cascade do |t|
+    t.bigint "ad_id", null: false
+    t.datetime "clicked_at"
+    t.bigint "user_id"
+    t.string "page"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ad_id"], name: "index_ad_clicks_on_ad_id"
+  end
+
   create_table "addresses", force: :cascade do |t|
     t.string "address1"
     t.string "address2"
@@ -60,19 +70,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_10_050822) do
     t.index ["user_id"], name: "index_addresses_on_user_id"
   end
 
+  create_table "admin_users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.boolean "superadmin", default: false
+    t.string "name"
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_admin_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+  end
+
   create_table "ads", force: :cascade do |t|
     t.string "title"
     t.text "content"
     t.string "target_url"
-    t.integer "clicks", default: 0
     t.string "position"
     t.string "specialty"
-    t.datetime "last_clicked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image_url"
-    t.jsonb "page_clicks"
-    t.jsonb "user_clicks"
   end
 
   create_table "chats", force: :cascade do |t|
@@ -147,6 +167,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_10_050822) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ad_clicks", "ads"
   add_foreign_key "addresses", "users"
   add_foreign_key "connections", "users"
   add_foreign_key "connections", "users", column: "connected_user_id"

@@ -1,0 +1,136 @@
+<div class="py-6">
+  <div class="flex items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mr-4">Ad Performance: <%= @ad.title %></h1>
+    <%= link_to 'Back to Ad', admin_ad_path(@ad), class: 'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap' %>
+  </div>
+
+  <!-- Daily Performance Chart -->
+  <div class="bg-white shadow rounded-lg p-6 mb-8">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Daily Clicks (Last 30 Days)</h2>
+    <div class="relative" style="height: 400px;">
+      <canvas id="dailyPerformanceChart" class="w-full h-full"></canvas>
+    </div>
+  </div>
+
+  <!-- Click History -->
+  <div class="mt-8 bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Click History</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @ad.click_history.each do |click| %>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= click.clicked_at.strftime("%b %d, %Y %H:%M:%S") %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= click.user&.email || 'Anonymous' %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= click.page == '/' ? 'Landing Page' : click.page %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Remove the importmap and use direct CDN script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+
+  <!-- Test script to verify basic JavaScript execution -->
+  <script>
+    console.log('Basic script test - this should appear in console');
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOMContentLoaded event fired');
+    });
+  </script>
+
+  <script>
+    document.addEventListener('turbo:load', function() {
+      console.log('Turbo load event fired');
+      
+      const canvas = document.getElementById('dailyPerformanceChart');
+      console.log('Canvas element:', canvas);
+      
+      if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+      }
+
+      // Only destroy if the chart exists and has a destroy method
+      if (window.dailyPerformanceChart && typeof window.dailyPerformanceChart.destroy === 'function') {
+        console.log('Destroying existing chart');
+        window.dailyPerformanceChart.destroy();
+      }
+
+      const ctx = canvas.getContext('2d');
+      const dailyStats = <%= raw @daily_stats_json %>;
+      console.log('Daily stats data:', dailyStats);
+      
+      const dates = Object.keys(dailyStats);
+      const clicks = Object.values(dailyStats);
+      console.log('Dates:', dates);
+      console.log('Clicks:', clicks);
+
+      try {
+        window.dailyPerformanceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [{
+              label: 'Clicks',
+              data: clicks,
+              borderColor: 'rgb(79, 70, 229)',
+              backgroundColor: 'rgba(79, 70, 229, 0.1)',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: 'rgb(79, 70, 229)',
+              fill: true,
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                },
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              },
+              x: {
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              }
+            }
+          }
+        });
+        console.log('Chart successfully initialized');
+      } catch (error) {
+        console.error('Error initializing chart:', error);
+      }
+    });
+  </script>
+</div> 

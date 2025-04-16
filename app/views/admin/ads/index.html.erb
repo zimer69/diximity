@@ -1,0 +1,289 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-xl font-semibold text-gray-900">Ads</h1>
+      <p class="mt-2 text-sm text-gray-700">A list of all ads in the system.</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "New Ad", new_admin_ad_path, class: "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto" %>
+    </div>
+  </div>
+
+  <div class="mt-4 flex flex-col md:flex-row justify-center items-center gap-4">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search by title, content, or specialty..."
+      class="w-full max-w-xl px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+    />
+    <select id="specialty-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Specialties</option>
+      <% @ads.map(&:specialty).uniq.compact.each do |specialty| %>
+        <option value="<%= specialty.downcase %>"><%= specialty %></option>
+      <% end %>
+    </select>
+    <select id="advertiser-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Advertisers</option>
+      <% @ads.map(&:target_url).uniq.compact.each do |url| %>
+        <% begin
+             domain = URI.parse(url).host.gsub(/^www\./, '').split('.').first
+             domain = domain.capitalize
+           rescue
+             domain = url
+           end %>
+        <option value="<%= domain.downcase %>"><%= domain %></option>
+      <% end %>
+    </select>
+    <select id="date-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
+      <option value="">All Time</option>
+      <option value="today">Today</option>
+      <option value="week">Last Week</option>
+      <option value="month">Last Month</option>
+      <option value="year">Last Year</option>
+    </select>
+  </div>
+
+  <div class="mt-8 flex flex-col">
+    <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+          <table class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Title</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Specialty</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Advertiser</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Created</th>
+                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <% @ads.each do |ad| %>
+                <tr class="searchable-row hover:bg-gray-50 cursor-pointer" data-controller="clickable-row" data-action="click->clickable-row#navigate" data-url="<%= admin_ad_path(ad) %>">
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                    <%= ad.title %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <%= ad.specialty %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <%= begin
+                          domain = URI.parse(ad.target_url).host.gsub(/^www\./, '').split('.').first
+                          domain.capitalize
+                        rescue
+                          ad.target_url
+                        end %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <%= ad.created_at.strftime('%b %d, %Y') %>
+                  </td>
+                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <div class="flex justify-end gap-2">
+                      <%= link_to "View", admin_ad_path(ad), class: "text-indigo-600 hover:text-indigo-900" %>
+                      <%= button_to "Delete", admin_ad_path(ad),
+                          method: :delete,
+                          class: "text-red-600 hover:text-red-900",
+                          form: { data: { turbo_confirm: "Are you sure you want to delete this ad?" } } %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Chart -->
+  <div class="mt-8 bg-white shadow rounded-lg p-6 mb-12">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Ad Performance Comparison (Last 30 Days)</h2>
+    <div class="relative" style="height: 400px;">
+      <canvas id="comparisonChart" class="w-full h-full"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script>
+    document.addEventListener('turbo:load', function() {
+      const input = document.getElementById("search-input");
+      const specialtyFilter = document.getElementById("specialty-filter");
+      const advertiserFilter = document.getElementById("advertiser-filter");
+      const dateFilter = document.getElementById("date-filter");
+      const rows = document.querySelectorAll(".searchable-row");
+
+      const getDateRange = (range) => {
+        const now = new Date();
+        switch(range) {
+          case 'today':
+            return now.setHours(0, 0, 0, 0);
+          case 'week':
+            return new Date(now.setDate(now.getDate() - 7));
+          case 'month':
+            return new Date(now.setMonth(now.getMonth() - 1));
+          case 'year':
+            return new Date(now.setFullYear(now.getFullYear() - 1));
+          default:
+            return null;
+        }
+      };
+
+      const filterRows = () => {
+        const query = input.value.toLowerCase();
+        const selectedSpecialty = specialtyFilter.value;
+        const selectedAdvertiser = advertiserFilter.value;
+        const selectedDate = dateFilter.value;
+        const dateThreshold = getDateRange(selectedDate);
+
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          const specialtyMatch = selectedSpecialty === "" || text.includes(selectedSpecialty);
+          const advertiserMatch = selectedAdvertiser === "" || text.includes(selectedAdvertiser);
+          const textMatch = text.includes(query);
+          
+          let dateMatch = true;
+          if (dateThreshold) {
+            const dateCell = row.querySelector('td:nth-child(4)');
+            if (dateCell) {
+              const adDate = new Date(dateCell.textContent.trim());
+              dateMatch = adDate >= dateThreshold;
+            }
+          }
+
+          if (textMatch && specialtyMatch && advertiserMatch && dateMatch) {
+            row.classList.remove("hidden");
+          } else {
+            row.classList.add("hidden");
+          }
+        });
+      };
+
+      input.addEventListener("input", filterRows);
+      specialtyFilter.addEventListener("change", filterRows);
+      advertiserFilter.addEventListener("change", filterRows);
+      dateFilter.addEventListener("change", filterRows);
+
+      // Chart initialization
+      const canvas = document.getElementById('comparisonChart');
+      console.log('Canvas element:', canvas);
+      
+      if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+      }
+
+      // Only destroy if the chart exists and has a destroy method
+      if (window.comparisonChart && typeof window.comparisonChart.destroy === 'function') {
+        console.log('Destroying existing chart');
+        window.comparisonChart.destroy();
+      }
+
+      const ctx = canvas.getContext('2d');
+      const dailyStats = <%= raw @daily_stats_json %>;
+      console.log('Raw daily stats data:', dailyStats);
+      console.log('Type of dailyStats:', typeof dailyStats);
+      
+      if (!dailyStats || Object.keys(dailyStats).length === 0) {
+        console.error('No daily stats data available');
+        return;
+      }
+
+      const dates = Object.keys(dailyStats);
+      console.log('Dates array:', dates);
+      console.log('Number of dates:', dates.length);
+      
+      const colors = [
+        'rgb(79, 70, 229)',   // Indigo
+        'rgb(16, 185, 129)',  // Emerald
+        'rgb(245, 158, 11)',  // Amber
+        'rgb(239, 68, 68)',   // Red
+        'rgb(59, 130, 246)',  // Blue
+        'rgb(168, 85, 247)',  // Purple
+      ];
+
+      const datasets = [];
+      <% @ads.each_with_index do |ad, index| %>
+        console.log('Processing ad:', <%= ad.id %>, '<%= ad.title %>');
+        const ad<%= ad.id %>Data = dates.map(date => {
+          const dayData = dailyStats[date];
+          console.log('Day data for', date, ':', dayData);
+          if (!dayData) {
+            console.warn('No data for date:', date);
+            return 0;
+          }
+          const adData = dayData[<%= ad.id %>];
+          console.log('Ad data for', date, ':', adData);
+          return adData ? adData.clicks : 0;
+        });
+        console.log('Complete data for ad', <%= ad.id %>, ':', ad<%= ad.id %>Data);
+        
+        datasets.push({
+          label: '<%= begin
+                    domain = URI.parse(ad.target_url).host.gsub(/^www\./, '').split('.').first
+                    "#{domain.capitalize} (#{ad.position})"
+                  rescue
+                    ad.title
+                  end %>',
+          data: ad<%= ad.id %>Data,
+          borderColor: colors[<%= index %> % colors.length],
+          backgroundColor: colors[<%= index %> % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: colors[<%= index %> % colors.length],
+          fill: true,
+          tension: 0.1
+        });
+      <% end %>
+
+      console.log('Final datasets:', datasets);
+
+      try {
+        window.comparisonChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                },
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              },
+              x: {
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              }
+            }
+          }
+        });
+        console.log('Chart successfully initialized');
+      } catch (error) {
+        console.error('Error initializing chart:', error);
+        console.error('Error stack:', error.stack);
+      }
+    });
+  </script>
+</div> 

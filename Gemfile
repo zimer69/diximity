@@ -76,3 +76,5 @@ gem 'unsplash'
 gem 'image_processing'
 
 gem "dotenv-rails", groups: [:development, :test]
+
+gem 'groupdate'
