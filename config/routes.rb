@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
-  devise_for :admin_users
+  devise_for :admin_users, controllers: {
+    sessions: 'admin/sessions'
+  }, path: 'admin'
   get "notifications/index"
   get "connections/create"
   get "connections/update"
