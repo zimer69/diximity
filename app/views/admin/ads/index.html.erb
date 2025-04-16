@@ -25,8 +25,13 @@
     <select id="advertiser-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
       <option value="">All Advertisers</option>
       <% @ads.map(&:target_url).uniq.compact.each do |url| %>
-        <% domain = URI.parse(url).host.gsub(/^www\./, '').split('.').first rescue url %>
-        <option value="<%= domain.downcase %>"><%= domain.capitalize %></option>
+        <% begin
+             domain = URI.parse(url).host.gsub(/^www\./, '').split('.').first
+             domain = domain.capitalize
+           rescue
+             domain = url
+           end %>
+        <option value="<%= domain.downcase %>"><%= domain %></option>
       <% end %>
     </select>
     <select id="date-filter" class="w-full max-w-xs px-4 py-2 border rounded shadow-sm">
@@ -64,7 +69,12 @@
                     <%= ad.specialty %>
                   </td>
                   <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    <%= URI.parse(ad.target_url).host.gsub(/^www\./, '').split('.').first.capitalize rescue ad.target_url %>
+                    <%= begin
+                          domain = URI.parse(ad.target_url).host.gsub(/^www\./, '').split('.').first
+                          domain.capitalize
+                        rescue
+                          ad.target_url
+                        end %>
                   </td>
                   <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     <%= ad.created_at.strftime('%b %d, %Y') %>
@@ -86,65 +96,194 @@
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  document.addEventListener("turbo:load", () => {
-    const input = document.getElementById("search-input");
-    const specialtyFilter = document.getElementById("specialty-filter");
-    const advertiserFilter = document.getElementById("advertiser-filter");
-    const dateFilter = document.getElementById("date-filter");
-    const rows = document.querySelectorAll(".searchable-row");
+  <!-- Comparison Chart -->
+  <div class="mt-8 bg-white shadow rounded-lg p-6 mb-12">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Ad Performance Comparison (Last 30 Days)</h2>
+    <div class="relative" style="height: 400px;">
+      <canvas id="comparisonChart" class="w-full h-full"></canvas>
+    </div>
+  </div>
 
-    const getDateRange = (range) => {
-      const now = new Date();
-      switch(range) {
-        case 'today':
-          return now.setHours(0, 0, 0, 0);
-        case 'week':
-          return new Date(now.setDate(now.getDate() - 7));
-        case 'month':
-          return new Date(now.setMonth(now.getMonth() - 1));
-        case 'year':
-          return new Date(now.setFullYear(now.getFullYear() - 1));
-        default:
-          return null;
-      }
-    };
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script>
+    document.addEventListener('turbo:load', function() {
+      const input = document.getElementById("search-input");
+      const specialtyFilter = document.getElementById("specialty-filter");
+      const advertiserFilter = document.getElementById("advertiser-filter");
+      const dateFilter = document.getElementById("date-filter");
+      const rows = document.querySelectorAll(".searchable-row");
 
-    const filterRows = () => {
-      const query = input.value.toLowerCase();
-      const selectedSpecialty = specialtyFilter.value;
-      const selectedAdvertiser = advertiserFilter.value;
-      const selectedDate = dateFilter.value;
-      const dateThreshold = getDateRange(selectedDate);
+      const getDateRange = (range) => {
+        const now = new Date();
+        switch(range) {
+          case 'today':
+            return now.setHours(0, 0, 0, 0);
+          case 'week':
+            return new Date(now.setDate(now.getDate() - 7));
+          case 'month':
+            return new Date(now.setMonth(now.getMonth() - 1));
+          case 'year':
+            return new Date(now.setFullYear(now.getFullYear() - 1));
+          default:
+            return null;
+        }
+      };
 
-      rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        const specialtyMatch = selectedSpecialty === "" || text.includes(selectedSpecialty);
-        const advertiserMatch = selectedAdvertiser === "" || text.includes(selectedAdvertiser);
-        const textMatch = text.includes(query);
-        
-        let dateMatch = true;
-        if (dateThreshold) {
-          const dateCell = row.querySelector('td:nth-child(4)');
-          if (dateCell) {
-            const adDate = new Date(dateCell.textContent.trim());
-            dateMatch = adDate >= dateThreshold;
+      const filterRows = () => {
+        const query = input.value.toLowerCase();
+        const selectedSpecialty = specialtyFilter.value;
+        const selectedAdvertiser = advertiserFilter.value;
+        const selectedDate = dateFilter.value;
+        const dateThreshold = getDateRange(selectedDate);
+
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          const specialtyMatch = selectedSpecialty === "" || text.includes(selectedSpecialty);
+          const advertiserMatch = selectedAdvertiser === "" || text.includes(selectedAdvertiser);
+          const textMatch = text.includes(query);
+          
+          let dateMatch = true;
+          if (dateThreshold) {
+            const dateCell = row.querySelector('td:nth-child(4)');
+            if (dateCell) {
+              const adDate = new Date(dateCell.textContent.trim());
+              dateMatch = adDate >= dateThreshold;
+            }
           }
-        }
 
-        if (textMatch && specialtyMatch && advertiserMatch && dateMatch) {
-          row.classList.remove("hidden");
-        } else {
-          row.classList.add("hidden");
-        }
-      });
-    };
+          if (textMatch && specialtyMatch && advertiserMatch && dateMatch) {
+            row.classList.remove("hidden");
+          } else {
+            row.classList.add("hidden");
+          }
+        });
+      };
 
-    input.addEventListener("input", filterRows);
-    specialtyFilter.addEventListener("change", filterRows);
-    advertiserFilter.addEventListener("change", filterRows);
-    dateFilter.addEventListener("change", filterRows);
-  });
-</script> 
+      input.addEventListener("input", filterRows);
+      specialtyFilter.addEventListener("change", filterRows);
+      advertiserFilter.addEventListener("change", filterRows);
+      dateFilter.addEventListener("change", filterRows);
+
+      // Chart initialization
+      const canvas = document.getElementById('comparisonChart');
+      console.log('Canvas element:', canvas);
+      
+      if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+      }
+
+      // Only destroy if the chart exists and has a destroy method
+      if (window.comparisonChart && typeof window.comparisonChart.destroy === 'function') {
+        console.log('Destroying existing chart');
+        window.comparisonChart.destroy();
+      }
+
+      const ctx = canvas.getContext('2d');
+      const dailyStats = <%= raw @daily_stats_json %>;
+      console.log('Raw daily stats data:', dailyStats);
+      console.log('Type of dailyStats:', typeof dailyStats);
+      
+      if (!dailyStats || Object.keys(dailyStats).length === 0) {
+        console.error('No daily stats data available');
+        return;
+      }
+
+      const dates = Object.keys(dailyStats);
+      console.log('Dates array:', dates);
+      console.log('Number of dates:', dates.length);
+      
+      const colors = [
+        'rgb(79, 70, 229)',   // Indigo
+        'rgb(16, 185, 129)',  // Emerald
+        'rgb(245, 158, 11)',  // Amber
+        'rgb(239, 68, 68)',   // Red
+        'rgb(59, 130, 246)',  // Blue
+        'rgb(168, 85, 247)',  // Purple
+      ];
+
+      const datasets = [];
+      <% @ads.each_with_index do |ad, index| %>
+        console.log('Processing ad:', <%= ad.id %>, '<%= ad.title %>');
+        const ad<%= ad.id %>Data = dates.map(date => {
+          const dayData = dailyStats[date];
+          console.log('Day data for', date, ':', dayData);
+          if (!dayData) {
+            console.warn('No data for date:', date);
+            return 0;
+          }
+          const adData = dayData[<%= ad.id %>];
+          console.log('Ad data for', date, ':', adData);
+          return adData ? adData.clicks : 0;
+        });
+        console.log('Complete data for ad', <%= ad.id %>, ':', ad<%= ad.id %>Data);
+        
+        datasets.push({
+          label: '<%= begin
+                    domain = URI.parse(ad.target_url).host.gsub(/^www\./, '').split('.').first
+                    "#{domain.capitalize} (#{ad.position})"
+                  rescue
+                    ad.title
+                  end %>',
+          data: ad<%= ad.id %>Data,
+          borderColor: colors[<%= index %> % colors.length],
+          backgroundColor: colors[<%= index %> % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: colors[<%= index %> % colors.length],
+          fill: true,
+          tension: 0.1
+        });
+      <% end %>
+
+      console.log('Final datasets:', datasets);
+
+      try {
+        window.comparisonChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                },
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              },
+              x: {
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              }
+            }
+          }
+        });
+        console.log('Chart successfully initialized');
+      } catch (error) {
+        console.error('Error initializing chart:', error);
+        console.error('Error stack:', error.stack);
+      }
+    });
+  </script>
+</div> 

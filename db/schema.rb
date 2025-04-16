@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_12_022914) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_14_225159) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_12_022914) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "ad_clicks", force: :cascade do |t|
+    t.bigint "ad_id", null: false
+    t.datetime "clicked_at"
+    t.bigint "user_id"
+    t.string "page"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ad_id"], name: "index_ad_clicks_on_ad_id"
   end
 
   create_table "addresses", force: :cascade do |t|
@@ -78,15 +88,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_12_022914) do
     t.string "title"
     t.text "content"
     t.string "target_url"
-    t.integer "clicks", default: 0
     t.string "position"
     t.string "specialty"
-    t.datetime "last_clicked_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "image_url"
-    t.jsonb "page_clicks"
-    t.jsonb "user_clicks"
   end
 
   create_table "chats", force: :cascade do |t|
@@ -161,6 +167,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_12_022914) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ad_clicks", "ads"
   add_foreign_key "addresses", "users"
   add_foreign_key "connections", "users"
   add_foreign_key "connections", "users", column: "connected_user_id"

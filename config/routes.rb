@@ -49,6 +49,7 @@ Rails.application.routes.draw do
     resources :ads do
       member do
         get 'performance'
+        get 'comparison'
       end
     end
   end

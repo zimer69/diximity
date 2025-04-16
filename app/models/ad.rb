@@ -6,36 +6,42 @@ class Ad < ApplicationRecord
   validates :target_url, presence: true
   validates :position, inclusion: { in: %w[left right] }
 
+  has_many :ad_clicks, dependent: :destroy
+
   after_initialize :set_default_position, if: :new_record?
   after_create :fetch_og_data, if: -> { target_url.present? }
-  after_initialize :set_default_values, if: :new_record?
 
   def set_default_position
     self.position ||= 'right'
   end
 
-  def set_default_values
-    self.page_clicks ||= {} # Ensure it's always an empty hash if not set
-    self.user_clicks ||= {} # Ensure it's always an empty hash if not set
+  def track_click(user_id, page)
+    # Create a new click record
+    ad_clicks.create!(
+      user_id: user_id,
+      page: page,
+      clicked_at: Time.current
+    )
   end
 
-  def track_click(user_id, page)
-    # Increment total clicks
-    increment!(:clicks)
+  def click_history
+    ad_clicks.recent.includes(:user)
+  end
 
-    # Track page clicks
-    self.page_clicks[page] ||= 0
-    self.page_clicks[page] += 1
+  def total_clicks
+    ad_clicks.count
+  end
 
-    # Track user clicks (indexed by user_id)
-    self.user_clicks[user_id.to_s] ||= 0
-    self.user_clicks[user_id.to_s] += 1
+  def last_clicked_at
+    ad_clicks.maximum(:clicked_at)
+  end
 
-    # Update last clicked timestamp
-    self.last_clicked_at = Time.current
+  def clicks_by_page
+    ad_clicks.group(:page).count
+  end
 
-    # Save the ad after making updates
-    save
+  def clicks_by_user
+    ad_clicks.group(:user_id).count
   end
 
   private
