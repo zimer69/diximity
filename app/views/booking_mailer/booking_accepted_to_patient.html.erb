@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <%= image_tag 'Diximity-logo.png', alt: 'Diximity Logo', style: 'max-width: 200px; height: auto;' %>
+      </div>
+      
+      <h2 style="color: #4F46E5;">Appointment Confirmed!</h2>
+      
+      <p>Hello <%= @time_slot.patient_name %>,</p>
+      
+      <p>Your appointment request has been confirmed. Here are the details:</p>
+      
+      <div style="background-color: #F3F4F6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Date:</strong> <%= @time_slot.date.strftime("%B %d, %Y") %></p>
+        <p><strong>Time:</strong> <%= @time_slot.start_time.strftime("%I:%M %p") %> - <%= @time_slot.end_time.strftime("%I:%M %p") %></p>
+      </div>
+
+      <p>Your video call link is ready:</p>
+      <div style="margin: 20px 0;">
+        <a href="<%= @video_call_link %>" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+          Join Video Call
+        </a>
+      </div>
+
+      <p>Please make sure to:</p>
+      <ul>
+        <li>Test your camera and microphone before the call</li>
+        <li>Join the call 5 minutes before your scheduled time</li>
+        <li>Have a stable internet connection</li>
+      </ul>
+
+      <p>If you need to reschedule or have any questions, please contact us.</p>
+
+      <p>Best regards,<br>The Diximity Team</p>
+    </div>
+  </body>
+</html> 

@@ -7,9 +7,9 @@
     </div>
 
     <div class="flex space-x-6 items-center">
-        <% if user_signed_in? %>
         <%= link_to "Feed", posts_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
         <%= link_to "Explore", explore_index_path, class: "text-gray-700 hover:text-blue-600 font-medium" %>
+        <% if user_signed_in? %>
         <%= link_to "Profile", user_path(current_user), class: "text-gray-700 hover:text-blue-600 font-medium" %>
         <div class="relative" data-controller="navbar-dropdown">
             <button
@@ -25,6 +25,9 @@
                 <span class="absolute top-1 right-1 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
                 <% end %>
                 <% if current_user.chats.joins(:messages).where(messages: { read: false }).where.not(messages: { user_id: current_user.id }).any? %>
+                    <span class="absolute top-1 right-1 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
+                <% end %>
+                <% if current_user.pending_time_slots_count > 0 %>
                     <span class="absolute top-1 right-1 inline-block w-2 h-2 bg-red-600 rounded-full"></span>
                 <% end %>
             </button>
@@ -54,6 +57,12 @@
                     <span class="text-sm">💬 Messages</span>
                 <% end %>
                 <%= link_to "👥 Connections", connections_path, class: "block px-4 py-2 hover:bg-gray-100" %>
+                <%= link_to calendar_path, class: "block px-4 py-2 hover:bg-gray-100 relative" do %>
+                    <span class="text-sm">📅 Calendar</span>
+                    <% if current_user.pending_time_slots_count > 0 %>
+                        <span class="absolute top-2 right-4 w-2 h-2 bg-red-600 rounded-full"></span>
+                    <% end %>
+                <% end %>
                 <%= link_to "📜 About Us", "#", class: "block px-4 py-2 hover:bg-gray-100" %>
                 <%= link_to "📞 Contact", "#", class: "block px-4 py-2 hover:bg-gray-100" %>
                 <%= button_to "🚪 Sign Out", destroy_user_session_path,

@@ -2,8 +2,8 @@
   <article class="prose prose-lg mx-auto">
     <header class="mb-12">
       <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
-        <time datetime="<%= @post.published_at.iso8601 %>">
-          <%= @post.published_at.strftime("%B %d, %Y") %>
+        <time datetime="<%= @post.created_at.iso8601 %>">
+          <%= @post.created_at.strftime("%B %d, %Y") %>
         </time>
         <% if @post.source.present? %>
           <span class="text-gray-300">•</span>

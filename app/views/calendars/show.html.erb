@@ -1,0 +1,451 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-controller="modal">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">My Calendar</h1>
+      <p class="mt-2 text-sm text-gray-600">Manage your appointments and available time slots</p>
+    </div>
+    <button 
+      type="button"
+      data-action="click->modal#open"
+      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    >
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Add Time Slot
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Calendar View -->
+    <div class="lg:col-span-3 bg-white shadow rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Calendar View</h2>
+      </div>
+      <div id="calendar" class="calendar"></div>
+      <div class="flex items-center justify-center space-x-8 mt-6 pt-4 border-t">
+        <div class="flex items-center">
+          <div class="w-4 h-4 bg-green-100 border border-green-300 rounded mr-2"></div>
+          <span class="text-sm text-gray-600">Available</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded mr-2"></div>
+          <span class="text-sm text-gray-600">Pending</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-4 h-4 bg-blue-100 border border-blue-300 rounded mr-2"></div>
+          <span class="text-sm text-gray-600">Scheduled</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Slots List -->
+    <div class="lg:col-span-1 bg-white shadow rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Time Slots</h2>
+        <div class="relative">
+          <select id="timeSlotFilter" class="appearance-none bg-gray-50 border border-gray-300 text-gray-700 py-1 px-3 pr-8 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="all">All Slots</option>
+            <option value="available">Available</option>
+            <option value="scheduled">Scheduled</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="time-slots-container space-y-4 custom-scrollbar">
+        <% @time_slots.each do |time_slot| %>
+          <div class="time-slot-item border rounded-lg p-4 transition-all duration-200 hover:shadow-md <%= 
+            case time_slot.status
+            when 'scheduled'
+              'bg-blue-50 border-blue-200'
+            when 'pending'
+              'bg-yellow-50 border-yellow-200'
+            else
+              'bg-green-50 border-green-200'
+            end
+          %>" data-status="<%= time_slot.status %>">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= 
+                    case time_slot.status
+                    when 'scheduled'
+                      'bg-blue-100 text-blue-800'
+                    when 'pending'
+                      'bg-yellow-100 text-yellow-800'
+                    else
+                      'bg-green-100 text-green-800'
+                    end
+                  %>">
+                    <%= time_slot.status.titleize %>
+                  </span>
+                  <p class="font-medium text-gray-900"><%= time_slot.date.strftime("%B %d, %Y") %></p>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">
+                  <%= time_slot.start_time.strftime("%I:%M %p") %> - <%= time_slot.end_time.strftime("%I:%M %p") %>
+                </p>
+                <% if time_slot.status != 'available' %>
+                  <div class="mt-3 p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="flex items-center space-x-2 mb-2">
+                      <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <p class="text-sm font-semibold text-gray-900">Patient Information</p>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-sm text-gray-600">
+                        <span class="font-medium text-gray-700">Name:</span> <%= time_slot.patient_name %>
+                      </p>
+                      <p class="text-sm text-gray-600">
+                        <span class="font-medium text-gray-700">Email:</span> <%= time_slot.patient_email %>
+                      </p>
+                    </div>
+                    <% if time_slot.status == 'pending' %>
+                      <div class="mt-3 flex space-x-2">
+                        <%= button_to accept_booking_calendar_time_slot_path(calendar_id: @calendar.id, id: time_slot.id), 
+                            method: :patch,
+                            class: "flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" do %>
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Accept
+                        <% end %>
+                        <%= button_to reject_booking_calendar_time_slot_path(calendar_id: @calendar.id, id: time_slot.id), 
+                            method: :patch,
+                            class: "flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Reject
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+              <div class="flex space-x-2">
+                <% if time_slot.status == 'available' %>
+                  <%= button_to calendar_time_slot_path(time_slot), 
+                      method: :delete, 
+                      class: "p-1 text-red-600 hover:text-red-900 rounded-full hover:bg-red-100 transition-colors duration-200",
+                      form: { data: { turbo_confirm: "Are you sure you want to delete this time slot?" } } do %>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Time Slot Modal -->
+  <div 
+    data-modal-target="modal"
+    class="fixed inset-0 z-10 overflow-y-auto hidden"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div data-modal-target="modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div class="absolute top-0 right-0 pt-4 pr-4">
+          <button type="button" data-action="click->modal#close" class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span class="sr-only">Close</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="sm:flex sm:items-start">
+          <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+              Add New Time Slot
+            </h3>
+            <div class="mt-2">
+              <%= form_with(model: TimeSlot.new, url: calendar_time_slots_path, local: true, class: "space-y-6") do |f| %>
+                <%= f.hidden_field :status, value: 'available' %>
+                <div>
+                  <%= f.label :date, class: "block text-sm font-medium text-gray-700" %>
+                  <%= f.date_field :date, 
+                      required: true,
+                      class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <%= f.label :start_time, "Start Time", class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.select :start_time, 
+                        (0..23).map { |h| 
+                          [0, 15, 30, 45].map { |m| 
+                            ["#{h.to_s.rjust(2, '0')}:#{m.to_s.rjust(2, '0')}", "#{h.to_s.rjust(2, '0')}:#{m.to_s.rjust(2, '0')}"] 
+                          }
+                        }.flatten(1),
+                        { include_blank: true },
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :end_time, "End Time", class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.select :end_time, 
+                        (0..23).map { |h| 
+                          [0, 15, 30, 45].map { |m| 
+                            ["#{h.to_s.rjust(2, '0')}:#{m.to_s.rjust(2, '0')}", "#{h.to_s.rjust(2, '0')}:#{m.to_s.rjust(2, '0')}"] 
+                          }
+                        }.flatten(1),
+                        { include_blank: true },
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                  </div>
+                </div>
+
+                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <%= f.submit "Add Time Slot", class: "w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" %>
+                  <button type="button" data-action="click->modal#close" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                    Cancel
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_include_tag "https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js" %>
+<%= stylesheet_link_tag "https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" %>
+
+<style>
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .time-slots-container {
+    height: 600px;
+    min-width: 300px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .time-slot-item {
+    min-height: 120px;
+    display: flex;
+    max-width: 80%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .time-slot-item[style*="display: none"] {
+    position: absolute;
+    visibility: hidden;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .time-slot-item:not([style*="display: none"]) {
+    position: relative;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .fc {
+    background-color: white;
+    border-radius: 0.5rem;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .fc .fc-button-primary {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+  }
+
+  .fc .fc-button-primary:hover {
+    background-color: #4338ca;
+    border-color: #4338ca;
+  }
+
+  .fc .fc-button-primary:not(:disabled).fc-button-active {
+    background-color: #3730a3;
+    border-color: #3730a3;
+  }
+
+  .fc-event {
+    padding: 2px;
+  }
+
+  .fc-event-title {
+    font-size: 0.875rem;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  /* Event colors for all views */
+  .fc-event.available-slot {
+    background-color: rgb(220 252 231) !important;
+    border-color: rgb(134 239 172) !important;
+  }
+
+  .fc-event.available-slot .fc-event-main {
+    color: rgb(22 101 52) !important;
+  }
+
+  .fc-event.scheduled-slot {
+    background-color: rgb(219 234 254) !important;
+    border-color: rgb(147 197 253) !important;
+  }
+
+  .fc-event.scheduled-slot .fc-event-main {
+    color: rgb(30 58 138) !important;
+  }
+
+  .fc-event.pending-slot {
+    background-color: rgb(254 249 195) !important;
+    border-color: rgb(253 224 71) !important;
+  }
+
+  .fc-event.pending-slot .fc-event-main {
+    color: rgb(133 77 14) !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('timeSlotFilter');
+    console.log('Filter select found:', filterSelect); // Debug log
+    
+    const timeSlotItems = document.querySelectorAll('.time-slot-item');
+    console.log('Time slot items found:', timeSlotItems.length); // Debug log
+    
+    function applyFilter() {
+      console.log('Filter function called'); // Debug log
+      const selectedValue = filterSelect.value;
+      console.log('Selected value:', selectedValue); // Debug log
+      
+      timeSlotItems.forEach(item => {
+        const status = item.getAttribute('data-status');
+        console.log('Item status:', status); // Debug log
+        
+        if (selectedValue === 'all') {
+          item.style.display = 'block';
+        } else if (status === selectedValue) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Apply filter on page load
+    applyFilter();
+    
+    // Apply filter when selection changes
+    filterSelect.addEventListener('change', (e) => {
+      console.log('Change event fired', e.target.value); // Debug log
+      applyFilter();
+    });
+  });
+
+  function initializeCalendar() {
+    console.log('Initializing calendar...');
+    
+    var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+      console.error('Calendar element not found!');
+      return;
+    }
+    
+    console.log('Calendar element found, creating FullCalendar instance...');
+    console.log('Time slots data:', <%= @time_slots.to_json.html_safe %>);
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      aspectRatio: 1.8,
+      displayEventTime: false,
+      allDaySlot: false,
+      events: {
+        url: '/calendar.json',
+        method: 'GET',
+        failure: function() {
+          console.error('Failed to fetch time slots');
+        }
+      },
+      eventDidMount: function(info) {
+        const eventEl = info.el;
+        const event = info.event;
+        const status = event.extendedProps.status;
+        
+        // Add status-specific classes
+        if (status === 'scheduled') {
+          eventEl.classList.add('scheduled-slot');
+        } else if (status === 'pending') {
+          eventEl.classList.add('pending-slot');
+        } else {
+          eventEl.classList.add('available-slot');
+        }
+
+        const startTime = event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const endTime = event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const displayTitle = startTime + ' - ' + endTime;
+        
+        const titleEl = eventEl.querySelector('.fc-event-title');
+        if (titleEl) {
+          titleEl.textContent = displayTitle;
+          titleEl.classList.add('font-medium', 'text-center');
+        }
+      }
+    });
+    
+    try {
+      calendar.render();
+      console.log('Calendar rendered successfully');
+    } catch (error) {
+      console.error('Error rendering calendar:', error);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initializeCalendar);
+  document.addEventListener('turbo:load', initializeCalendar);
+</script> 

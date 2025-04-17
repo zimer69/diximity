@@ -21,3 +21,32 @@
   right: 8rem;
   animation: float 4s ease-in-out infinite;
 }
+
+/* Navbar dropdown menu */
+[data-navbar-dropdown-target="menu"] {
+  z-index: 9999 !important;
+}
+
+/* Ads container */
+.ads-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Left ad */
+.ad-left {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* Right ad */
+.ad-right {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}

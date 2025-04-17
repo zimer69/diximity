@@ -1,10 +1,10 @@
 class UsersController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:show]
   before_action :find_user, only: [:show, :update]
-  before_action :authenticate_user!, only: [:show]
 
   def show
     @user = User.find(params[:id])
+    @available_slots = @user.calendar&.time_slots&.available&.upcoming || []
   end
 
   def update

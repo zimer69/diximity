@@ -10,7 +10,8 @@ Rails.application.routes.draw do
   root "posts#index"
   get "home/index"
   devise_for :users, controllers: {
-    registrations: 'users/registrations'
+    registrations: 'users/registrations',
+    sessions: 'users/sessions'
   }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -21,19 +22,38 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  resources :posts, only: [:index, :show]
-  resources :users, only: [:index, :show, :update]
-  resources :notifications, only: [:index, :update, :destroy] do
+  resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+    resources :comments, only: [:create, :destroy]
     member do
-      patch :mark_as_read
+      post :like
+      delete :unlike
     end
   end
-  resources :connections, only: %i[index create destroy] do
+
+  resources :users, only: [:show, :edit, :update] do
     member do
-      patch :accept
-      delete :reject
+      get :profile
+      get :connections
+      get :chats
     end
   end
+
+  resources :notifications, only: [:index] do
+    member do
+      post :mark_as_read
+    end
+    collection do
+      post :mark_all_as_read
+    end
+  end
+
+  resources :connections, only: [:index, :create, :update, :destroy] do
+    member do
+      post :accept
+      post :reject
+    end
+  end
+
   resources :chats, only: [:index, :show, :create] do
     resources :messages, only: [:create]
   end
@@ -44,15 +64,34 @@ Rails.application.routes.draw do
     end
   end
 
-  namespace :admin do
-    root 'dashboard#index'
-    resources :users
-    resources :posts
-    resources :ads do
+  resource :calendar, only: [:show] do
+    resources :time_slots, only: [:create, :update, :destroy] do
       member do
-        get 'performance'
-        get 'comparison'
+        patch :accept_booking
+        patch :reject_booking
       end
     end
+    member do
+      post :schedule
+    end
+  end
+
+  namespace :admin do
+    root to: 'dashboard#index'
+    resources :users, only: [:index, :show, :edit, :update, :destroy] do
+      member do
+        post :toggle_active
+      end
+    end
+    resources :posts, only: [:index, :show, :new, :create, :edit, :update, :destroy]
+    resources :ads do
+      member do
+        get :performance
+      end
+    end
+  end
+
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end
 end

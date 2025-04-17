@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_14_225159) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_16_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,6 +95,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_225159) do
     t.string "image_url"
   end
 
+  create_table "calendars", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_calendars_on_user_id"
+  end
+
   create_table "chats", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -147,6 +154,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_225159) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "time_slots", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "calendar_id", null: false
+    t.date "date"
+    t.time "start_time"
+    t.time "end_time"
+    t.string "status"
+    t.string "patient_name"
+    t.string "patient_email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["calendar_id"], name: "index_time_slots_on_calendar_id"
+    t.index ["user_id"], name: "index_time_slots_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -169,9 +191,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_14_225159) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ad_clicks", "ads"
   add_foreign_key "addresses", "users"
+  add_foreign_key "calendars", "users"
   add_foreign_key "connections", "users"
   add_foreign_key "connections", "users", column: "connected_user_id"
   add_foreign_key "messages", "chats"
   add_foreign_key "messages", "users"
   add_foreign_key "notifications", "users"
+  add_foreign_key "time_slots", "calendars"
+  add_foreign_key "time_slots", "users"
 end
