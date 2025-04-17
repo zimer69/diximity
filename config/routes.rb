@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       member do
         patch :accept_booking
         patch :reject_booking
+        post :cancel_booking
       end
     end
     member do

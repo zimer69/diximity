@@ -3,7 +3,8 @@ class ConnectionsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :find_connection, only: %i[accept reject]
-
+  before_action :set_connection_params, only: %i[create]
+  
   def index
     @pagy, @connections = pagy(
       Connection.where("user_id = ? OR connected_user_id = ?", current_user.id, current_user.id)
@@ -13,7 +14,10 @@ class ConnectionsController < ApplicationController
   end
 
   def create
+    puts '*' * 5000
+    puts params.inspect
     connection = current_user.connections.build(
+      user_id: current_user.id,
       connected_user_id: params[:user_id],
       status: :pending
     )
@@ -73,5 +77,9 @@ class ConnectionsController < ApplicationController
 
   def find_connection
     @connection = Connection.find(params[:id])
+  end
+
+  def set_connection_params
+    @connection_params = params.permit(:user_id)
   end
 end
