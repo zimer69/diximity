@@ -1,6 +1,6 @@
 class TimeSlotsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_time_slot, only: [:update, :destroy, :accept_booking, :reject_booking]
+  before_action :set_time_slot, only: [:update, :destroy, :accept_booking, :reject_booking, :cancel_booking]
 
   def create
     @time_slot = current_user.time_slots.build(time_slot_params)
@@ -51,6 +51,19 @@ class TimeSlotsController < ApplicationController
       redirect_to calendar_path(@time_slot.calendar), notice: 'Booking has been rejected successfully.'
     else
       redirect_to calendar_path(@time_slot.calendar), alert: 'This booking cannot be rejected.'
+    end
+  end
+
+  def cancel_booking
+    if @time_slot.status == 'scheduled'
+      # Send cancellation email with the message before updating the time slot
+      BookingMailer.booking_cancelled_to_patient(@time_slot, params[:cancellation_message]).deliver_later
+      
+      @time_slot.cancel_booking!
+      
+      redirect_to calendar_path, notice: 'Booking has been cancelled successfully. Notification has been sent to the patient.'
+    else
+      redirect_to calendar_path, alert: 'This booking cannot be cancelled.'
     end
   end
 

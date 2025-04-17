@@ -4,7 +4,7 @@
      target="_blank"
      data-action="click->ad-tracking#trackClick" 
      class="block">
-    <div class="ad-container fixed top-[60%] -translate-y-1/2 z-50 w-72 bg-white rounded-lg shadow-md overflow-hidden position-<%= j ad.position %>">
+    <div class="ad-container fixed top-[60%] -translate-y-1/2 z-50 w-[15vw] min-w-[150px] max-w-[300px] bg-white rounded-lg shadow-md overflow-hidden position-<%= j ad.position %>">
       <% if ad.image_url.present? %>
         <div class="relative w-full aspect-[4/3] flex items-center justify-center bg-gray-100">
           <img src="<%= ad.image_url %>" alt="Advertisement" class="w-full h-full object-contain" />
@@ -14,9 +14,9 @@
         </div>
       <% end %>
       
-      <div class="p-6 space-y-4">
-        <h4 class="font-bold text-xl text-gray-900"><%= ad.title %></h4>
-        <p class="text-base text-gray-700 leading-relaxed"><%= ad.content %></p>
+      <div class="p-3 sm:p-4 space-y-1 sm:space-y-2">
+        <h4 class="font-bold text-base sm:text-lg text-gray-900"><%= ad.title %></h4>
+        <p class="text-xs sm:text-sm text-gray-700 leading-relaxed"><%= ad.content %></p>
       </div>
     </div>
   </a>

@@ -29,6 +29,14 @@ class TimeSlot < ApplicationRecord
     )
   end
 
+  def cancel_booking!(cancellation_message = nil)
+    update!(
+      status: 'available',
+      patient_name: nil,
+      patient_email: nil
+    )
+  end
+
   private
 
   def end_time_after_start_time

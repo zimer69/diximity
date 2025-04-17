@@ -1,34 +1,48 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal"]
+  static targets = ["addTimeSlotModal", "cancelBookingModal"]
 
   connect() {
     console.log('Modal controller connected');
-    this.modalTarget.classList.add("hidden")
-  }
-
-  open() {
-    console.log('Opening modal');
-    this.modalTarget.classList.remove("hidden")
+    this.addTimeSlotModalTarget.classList.add("hidden")
+    this.cancelBookingModalTarget.classList.add("hidden")
     document.body.classList.add("overflow-hidden")
+    document.addEventListener('keydown', this.handleKeydown.bind(this))
   }
 
-  close() {
-    console.log('Closing modal');
-    this.modalTarget.classList.add("hidden")
-    document.body.classList.remove("overflow-hidden")
+  disconnect() {
+    document.removeEventListener('keydown', this.handleKeydown.bind(this))
   }
 
-  closeWithKeyboard(e) {
-    if (e.key === "Escape") {
-      this.close()
+  open(event) {
+    const button = event.currentTarget
+    const modalType = button.dataset.modalType || 'addTimeSlotModal'
+    const modal = this[`${modalType}Target`]
+    
+    if (modal) {
+      modal.classList.remove('hidden')
+      document.body.classList.add('overflow-hidden')
     }
   }
 
-  closeBackground(e) {
-    if (e.target === this.modalTarget) {
-      this.close()
+  close(event) {
+    const modal = event.currentTarget.closest('[data-modal-target]')
+    if (modal) {
+      modal.classList.add('hidden')
+      document.body.classList.remove('overflow-hidden')
     }
+  }
+
+  handleKeydown(event) {
+    if (event.key === 'Escape') {
+      this.closeAll()
+    }
+  }
+
+  closeAll() {
+    this.addTimeSlotModalTarget?.classList.add('hidden')
+    this.cancelBookingModalTarget?.classList.add('hidden')
+    document.body.classList.remove('overflow-hidden')
   }
 } 
