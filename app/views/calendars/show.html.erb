@@ -29,6 +29,10 @@
           <span class="text-sm text-gray-600">Available</span>
         </div>
         <div class="flex items-center">
+          <div class="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded mr-2"></div>
+          <span class="text-sm text-gray-600">Pending</span>
+        </div>
+        <div class="flex items-center">
           <div class="w-4 h-4 bg-blue-100 border border-blue-300 rounded mr-2"></div>
           <span class="text-sm text-gray-600">Scheduled</span>
         </div>
@@ -52,25 +56,74 @@
           </div>
         </div>
       </div>
-      <div class="space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar">
+      <div class="time-slots-container space-y-4 custom-scrollbar">
         <% @time_slots.each do |time_slot| %>
-          <div class="time-slot-item border rounded-lg p-4 transition-all duration-200 hover:shadow-md <%= time_slot.status == 'scheduled' ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200' %>" data-status="<%= time_slot.status %>">
+          <div class="time-slot-item border rounded-lg p-4 transition-all duration-200 hover:shadow-md <%= 
+            case time_slot.status
+            when 'scheduled'
+              'bg-blue-50 border-blue-200'
+            when 'pending'
+              'bg-yellow-50 border-yellow-200'
+            else
+              'bg-green-50 border-green-200'
+            end
+          %>" data-status="<%= time_slot.status %>">
             <div class="flex justify-between items-start">
               <div>
                 <div class="flex items-center space-x-2">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= time_slot.status == 'scheduled' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
-                    <%= time_slot.status == 'scheduled' ? 'Scheduled' : 'Available' %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= 
+                    case time_slot.status
+                    when 'scheduled'
+                      'bg-blue-100 text-blue-800'
+                    when 'pending'
+                      'bg-yellow-100 text-yellow-800'
+                    else
+                      'bg-green-100 text-green-800'
+                    end
+                  %>">
+                    <%= time_slot.status.titleize %>
                   </span>
                   <p class="font-medium text-gray-900"><%= time_slot.date.strftime("%B %d, %Y") %></p>
                 </div>
                 <p class="text-sm text-gray-600 mt-1">
                   <%= time_slot.start_time.strftime("%I:%M %p") %> - <%= time_slot.end_time.strftime("%I:%M %p") %>
                 </p>
-                <% if time_slot.status == 'scheduled' %>
-                  <div class="mt-2 p-2 bg-white rounded-md border border-gray-200">
-                    <p class="text-sm font-medium text-gray-900">Patient Details</p>
-                    <p class="text-sm text-gray-600"><%= time_slot.patient_name %></p>
-                    <p class="text-sm text-gray-600"><%= time_slot.patient_email %></p>
+                <% if time_slot.status != 'available' %>
+                  <div class="mt-3 p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="flex items-center space-x-2 mb-2">
+                      <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <p class="text-sm font-semibold text-gray-900">Patient Information</p>
+                    </div>
+                    <div class="space-y-1">
+                      <p class="text-sm text-gray-600">
+                        <span class="font-medium text-gray-700">Name:</span> <%= time_slot.patient_name %>
+                      </p>
+                      <p class="text-sm text-gray-600">
+                        <span class="font-medium text-gray-700">Email:</span> <%= time_slot.patient_email %>
+                      </p>
+                    </div>
+                    <% if time_slot.status == 'pending' %>
+                      <div class="mt-3 flex space-x-2">
+                        <%= button_to accept_booking_calendar_time_slot_path(calendar_id: @calendar.id, id: time_slot.id), 
+                            method: :patch,
+                            class: "flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" do %>
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Accept
+                        <% end %>
+                        <%= button_to reject_booking_calendar_time_slot_path(calendar_id: @calendar.id, id: time_slot.id), 
+                            method: :patch,
+                            class: "flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Reject
+                        <% end %>
+                      </div>
+                    <% end %>
                   </div>
                 <% end %>
               </div>
@@ -191,6 +244,44 @@
     background: #9ca3af;
   }
 
+  .time-slots-container {
+    height: 600px;
+    min-width: 300px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .time-slot-item {
+    min-height: 120px;
+    display: flex;
+    max-width: 80%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .time-slot-item[style*="display: none"] {
+    position: absolute;
+    visibility: hidden;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .time-slot-item:not([style*="display: none"]) {
+    position: relative;
+    visibility: visible;
+    opacity: 1;
+  }
+
   .fc {
     background-color: white;
     border-radius: 0.5rem;
@@ -244,73 +335,51 @@
   .fc-event.scheduled-slot .fc-event-main {
     color: rgb(30 58 138) !important;
   }
+
+  .fc-event.pending-slot {
+    background-color: rgb(254 249 195) !important;
+    border-color: rgb(253 224 71) !important;
+  }
+
+  .fc-event.pending-slot .fc-event-main {
+    color: rgb(133 77 14) !important;
+  }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const filterSelect = document.getElementById('timeSlotFilter');
+    console.log('Filter select found:', filterSelect); // Debug log
+    
     const timeSlotItems = document.querySelectorAll('.time-slot-item');
-    const form = document.querySelector('form');
-    const dateInput = form?.querySelector('[name="time_slot[date]"]');
-    const startTimeInput = form?.querySelector('[name="time_slot[start_time]"]');
-    const endTimeInput = form?.querySelector('[name="time_slot[end_time]"]');
-    const submitButton = form?.querySelector('input[type="submit"]');
-
-    // Time slot validation function
-    function validateTimeSlot() {
-      if (!dateInput?.value || !startTimeInput?.value || !endTimeInput?.value) return;
-
-      const selectedDate = dateInput.value;
-      const startTime = startTimeInput.value;
-      const endTime = endTimeInput.value;
-
-      // Check if end time is after start time
-      if (endTime <= startTime) {
-        submitButton.disabled = true;
-        alert('End time must be after start time');
-        return;
-      }
-
-      // Check for overlaps with existing slots
-      const events = calendar.getEvents();
-      const hasOverlap = events.some(event => {
-        if (event.startStr.split('T')[0] !== selectedDate) return false;
-
-        const existingStart = event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-        const existingEnd = event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-
-        return (
-          (startTime < existingEnd && endTime > existingStart) || // New slot overlaps with existing slot
-          (startTime >= existingStart && endTime <= existingEnd) || // New slot is contained within existing slot
-          (startTime <= existingStart && endTime >= existingEnd) // New slot contains existing slot
-        );
-      });
-
-      if (hasOverlap) {
-        submitButton.disabled = true;
-        alert('This time slot overlaps with an existing appointment');
-      } else {
-        submitButton.disabled = false;
-      }
-    }
-
-    // Add event listeners for form inputs
-    if (form) {
-      dateInput.addEventListener('change', validateTimeSlot);
-      startTimeInput.addEventListener('change', validateTimeSlot);
-      endTimeInput.addEventListener('change', validateTimeSlot);
-    }
-
-    filterSelect.addEventListener('change', function() {
-      const selectedValue = this.value;
+    console.log('Time slot items found:', timeSlotItems.length); // Debug log
+    
+    function applyFilter() {
+      console.log('Filter function called'); // Debug log
+      const selectedValue = filterSelect.value;
+      console.log('Selected value:', selectedValue); // Debug log
       
       timeSlotItems.forEach(item => {
-        if (selectedValue === 'all' || item.dataset.status === selectedValue) {
+        const status = item.getAttribute('data-status');
+        console.log('Item status:', status); // Debug log
+        
+        if (selectedValue === 'all') {
+          item.style.display = 'block';
+        } else if (status === selectedValue) {
           item.style.display = 'block';
         } else {
           item.style.display = 'none';
         }
       });
+    }
+
+    // Apply filter on page load
+    applyFilter();
+    
+    // Apply filter when selection changes
+    filterSelect.addEventListener('change', (e) => {
+      console.log('Change event fired', e.target.value); // Debug log
+      applyFilter();
     });
   });
 
@@ -351,6 +420,8 @@
         // Add status-specific classes
         if (status === 'scheduled') {
           eventEl.classList.add('scheduled-slot');
+        } else if (status === 'pending') {
+          eventEl.classList.add('pending-slot');
         } else {
           eventEl.classList.add('available-slot');
         }

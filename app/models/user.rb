@@ -62,6 +62,10 @@ class User < ApplicationRecord
     !deleted_at ? super : :deleted_account
   end
 
+  def pending_time_slots_count
+    time_slots.pending.count
+  end
+
   private
 
   def create_default_calendar

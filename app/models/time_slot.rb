@@ -5,15 +5,29 @@ class TimeSlot < ApplicationRecord
   validates :date, presence: true
   validates :start_time, presence: true
   validates :end_time, presence: true
-  validates :status, presence: true, inclusion: { in: %w[available scheduled] }
+  validates :status, presence: true, inclusion: { in: %w[available pending scheduled] }
 
   validate :end_time_after_start_time
   validate :no_overlap
+  validate :not_in_past
 
   scope :available, -> { where(status: 'available') }
-  scope :booked, -> { where(status: 'booked') }
-  scope :upcoming, -> { where('date >= ?', Date.today).order(date: :asc, start_time: :asc) }
+  scope :pending, -> { where(status: 'pending') }
+  scope :scheduled, -> { where(status: 'scheduled') }
+  scope :upcoming, -> { where('date > ? OR (date = ? AND start_time > ?)', Date.current, Date.current, Time.current.strftime('%H:%M')).order(date: :asc, start_time: :asc) }
   scope :past, -> { where('date < ?', Date.today).order(date: :desc, start_time: :desc) }
+
+  def accept_booking!
+    update!(status: 'scheduled')
+  end
+
+  def reject_booking!
+    update!(
+      status: 'available',
+      patient_name: nil,
+      patient_email: nil
+    )
+  end
 
   private
 
@@ -38,6 +52,15 @@ class TimeSlot < ApplicationRecord
 
     if overlapping_slots.exists?
       errors.add(:base, "This time slot overlaps with an existing appointment")
+    end
+  end
+
+  def not_in_past
+    if date.present? && start_time.present?
+      slot_time = Time.zone.parse("#{date} #{start_time.strftime('%H:%M')}")
+      if slot_time < Time.current
+        errors.add(:base, "Cannot create time slots in the past")
+      end
     end
   end
 end 

@@ -65,7 +65,12 @@ Rails.application.routes.draw do
   end
 
   resource :calendar, only: [:show] do
-    resources :time_slots, only: [:create, :update, :destroy]
+    resources :time_slots, only: [:create, :update, :destroy] do
+      member do
+        patch :accept_booking
+        patch :reject_booking
+      end
+    end
     member do
       post :schedule
     end
@@ -84,5 +89,9 @@ Rails.application.routes.draw do
         get :performance
       end
     end
+  end
+
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end
 end

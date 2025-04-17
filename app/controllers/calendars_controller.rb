@@ -1,8 +1,9 @@
 class CalendarsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:schedule]
 
   def show
-    @time_slots = current_user.time_slots.order(date: :asc, start_time: :asc)
+    @calendar = current_user.calendar || current_user.create_calendar
+    @time_slots = @calendar.time_slots.upcoming
     
     respond_to do |format|
       format.html
@@ -26,16 +27,16 @@ class CalendarsController < ApplicationController
   end
 
   def schedule
-    @time_slot = TimeSlot.find(params[:id])
+    @time_slot = TimeSlot.find(params[:time_slot_id])
     if @time_slot.update(
-      status: 'scheduled',
-      patient_name: params[:patient_name],
-      patient_email: params[:patient_email]
+      status: 'pending',
+      patient_name: params[:name],
+      patient_email: params[:email]
     )
       # TODO: Add email notification here
-      redirect_to calendar_path, notice: 'Appointment scheduled successfully!'
+      redirect_back fallback_location: root_path, notice: 'Appointment scheduled request sent successfully! If confirmed, you will receive an email.'
     else
-      redirect_to calendar_path, alert: 'Failed to schedule appointment.'
+      redirect_back fallback_location: root_path, alert: 'Failed to schedule appointment.'
     end
   end
 
